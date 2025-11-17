@@ -4,7 +4,7 @@ import time
 
 SERVER = "http://127.0.0.1:8080"
 CALLS_PER_CLIENT = 10_000
-NUM_CLIENTS = 1 
+NUM_CLIENTS = 5
 
 def worker(client_id):
     for i in range(CALLS_PER_CLIENT):
@@ -14,7 +14,7 @@ def worker(client_id):
             pass
 
 def main():
-    print(f"Starting {NUM_CLIENTS} clients × {CALLS_PER_CLIENT} calls each...")
+    print(f"Starting {NUM_CLIENTS} clients x {CALLS_PER_CLIENT} calls each...")
     start = time.time()
 
     threads = []
@@ -28,11 +28,15 @@ def main():
 
     end = time.time()
     elapsed = end - start
-
-    try:
-        final_count = int(requests.get(f"{SERVER}/count").text)
-    except:
-        final_count = -1
+    final_count = -1
+    i = 0
+    while final_count == -1 or i < 5:
+        try:
+            final_count = int(requests.get(f"{SERVER}/count").text)
+        except:
+            final_count = -1
+            i+=1
+            time.sleep(1)
 
     total_calls = CALLS_PER_CLIENT * NUM_CLIENTS
     throughput = total_calls / elapsed
