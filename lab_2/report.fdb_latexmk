@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1763394134.41736 "c:/Users/misha/OneDrive/Рабочий стол/універ/HLS/lab_1/report.tex" "report.pdf" "report" 1763394135.22979 0
+["pdflatex"] 1763563574.51355 "c:/Users/misha/OneDrive/Рабочий стол/універ/HLS/lab_2/report.tex" "report.pdf" "report" 1763563575.35399 0
   "C:/Program Files/MiKTeX/fonts/tfm/jknappen/ec/tcrm1000.tfm" 993062508 1436 c7f957a372ef2fbe93c0982f96625e12 ""
   "C:/Program Files/MiKTeX/fonts/tfm/public/cm/cmmi12.tfm" 1136765053 1524 4414a8315f39513458b80dfc63bff03a ""
   "C:/Program Files/MiKTeX/fonts/tfm/public/cm/cmmi6.tfm" 1136765053 1512 f21f83efb36853c0b70002322c1ab3ad ""
@@ -90,10 +90,14 @@
   "C:/Users/misha/AppData/Local/MiKTeX/fonts/tfm/lh/lh-t2a/latt0800.tfm" 1763383194 1272 2a21550efcb075c108e98819097de5c8 ""
   "C:/Users/misha/AppData/Local/MiKTeX/fonts/tfm/lh/lh-t2a/latt1000.tfm" 1728032249 1272 55f67101730a20777decd892fb4b4e3e ""
   "C:/Users/misha/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1726775428 24215231 938d974dd2fa16abdc9018a62e041106 ""
-  "c:/Users/misha/OneDrive/Рабочий стол/універ/HLS/lab_1/report.tex" 1763394133 14160 c9e9b38642d3b7f54ee03b956164afb5 ""
-  "report.aux" 1763394135 1937 462dd9e84418e3d8f2b482a82c8791c3 "pdflatex"
-  "report.out" 1763394135 2505 210698425124f3d4ebf604a98763f60e "pdflatex"
-  "report.tex" 1763394133 14160 c9e9b38642d3b7f54ee03b956164afb5 ""
+  "app_no_block.py" 1763558955 913 35b712728f98bc14b5b918e8cec73d18 ""
+  "app_pessimistic_block.py" 1763561001 898 452563a3ee1b0e7657840bdc905587b0 ""
+  "c:/Users/misha/OneDrive/Рабочий стол/універ/HLS/lab_2/report.tex" 1763563573 8952 ab289ff96f11ef3b86b79702114d62aa ""
+  "client.py" 1763561008 1612 23ea1216e86c2eead467af2e282d0dbf ""
+  "docker-compose.yml" 1763482166 1767 219a3fbc4f38fd61249252dce0913d32 ""
+  "report.aux" 1763563575 2007 6d0771565daa9814211da0e49e750d81 "pdflatex"
+  "report.out" 1763563575 1494 d239915208ceefce9661d5683a074849 "pdflatex"
+  "report.tex" 1763563573 8952 ab289ff96f11ef3b86b79702114d62aa ""
   (generated)
   "report.aux"
   "report.log"

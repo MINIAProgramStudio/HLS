@@ -1,0 +1,173 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[ukrainian]{babel}
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
+\title{Проєктування високонавантаженних систем. Лабораторна 2, звіт}
+\author{Михайло Голуб}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=t,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+\lstdefinelanguage{YAML}{
+  keywords={true,false,null,y,n},
+  keywordstyle=\color{blue}\bfseries,
+  basicstyle=\ttfamily,
+  sensitive=false,
+  comment=[l]{\#},
+  commentstyle=\color{gray}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  moredelim=[l]{:},
+  morestring=[b]',
+  morestring=[b]"
+}
+\graphicspath{ {./img/} }
+
+\def\code#1{\texttt{#1}}
+\begin{document}
+\maketitle
+\section{Завдання лабораторної роботи}
+\subsection{Загальне}
+\begin{enumerate}
+    \item Встановити і налаштувати Hazelcast 5.4.x (у новіших версіях частина необхідного для виконання завдань функціоналу є платною)
+    \item Сконфігурувати і запустити 3 ноди (інстанси) об'єднані в кластер або як частину Java-застосування, або як окремі застосування У справжній системі кожна нода має запускатись на окремому сервері.
+    \item Далі, на основі прикладу з Distributed Map, напишіть код який буде емулювати інкремент значення для одного й того самого ключа у циклі до 10К. 
+        Це необхідно робити у 10 потоках.
+    \item Виходячи з того, що 10 потоків інкрементують каунтер 10К разів кожен,
+        то остаточне значення каунтера має бути 10*10\_000 = 100\_000.
+        Для імплементації спочатку скористаємось Distributed Map у Hazelcast
+    \item Реалізуйте каунтер без блокувань. 
+        Поміряйте час виконання, та подивиться чи коректне кінцеве значення каунтера ви отримаєте.
+    \item Реалізуйте каунтер з використанням песимістичного блокування. 
+        Поміряйте час виконання, та подивиться чи коректне кінцеве значення каунтера ви отримаєте.
+    \item реалізуйте каунтер з використанням оптимістичного блокування. 
+        Поміряйте час виконання, та подивиться чи коректне кінцеве значення каунтера ви отримаєте.
+    \item Реалізуйте каунтер з використанням IAtomicLong та увімкнувши підтимку CP
+        Sysbsystem на основі трьох нод.
+        УВАГА! Без CP Sysbsystem не гарантується коректність результату 
+        (у протоколі мають бути логи Hazelcast з яких видно, що CP Subsystem активована та складається з 3-х нод)
+        Поміряйте час виконання, та подивиться чи коректне кінцеве значення каунтера ви отримаєте.
+\end{enumerate}
+
+\subsection{Вимоги до звіту та реалізації}
+\begin{itemize}
+    \item Мова реалізації будь-яка
+    \item Має бути надано код програми/скрипта та результати виконання
+    \item Приведно лог, який видають ноди Hazelcast, де буде видно що кластер складається з 3-х нод і що активована CP Subsystem
+
+\end{itemize}
+
+
+\section{Запуск Hazelcast }
+Hazelcast локально захощено через Docker. 
+Створюються три контейнери контейнери Hazelcast 5.4.0: \code{hz-node1}, \code{hz-node2}, \code{hz-node3} на портах 5701, 5702 та 5703 відповідно.
+Та контейнер Hazelcast management-center 5.4.0: \code{hz-mz} на порті 8080
+\lstinputlisting[
+    language=yaml,
+    caption={docker-compose.yml},
+    label={lst:dockercompose}
+]{docker-compose.yml}
+
+Після запуску усі чотири контейнери запущені успішно і існує кластер з трьома нодами. Про це свідчить ця частина логу:
+\begin{verbatim}
+[ WARN] [main] [c.h.c.CPSubsystem]: [hazelcast3]:5701 [dev] [5.4.0] CP Subsystem is not enabled. CP data structures will operate in UNSAFE mode! Please note that UNSAFE mode will not provide strong consistency guarantees.
+Members {size:3, ver:3} [
+    Member [hazelcast1]:5701 - 360c484e-0413-4f01-b810-edd4f20fb514
+    Member [hazelcast2]:5701 - 912b48a7-4b31-4303-9e30-06560e463ef1
+    Member [hazelcast3]:5701 - ae62cc6a-26c6-4188-b174-ce60c234888c this
+]
+\end{verbatim}
+
+\section{Клієнт}
+Майже ідентичний клієнту реалізованому в першій лабораторній роботі.
+Додано лог проходження певної частки запитів, для розуміння чи просувається виконання запитів.
+\lstinputlisting[
+    language=python,
+    caption={client.py},
+    label={lst:client}
+]{client.py}
+
+Приклад результату роботи клієнта:
+\begin{verbatim}
+Starting 10 clients x 10000 calls each...
+0 worker started
+1 worker started
+2 worker started
+3 worker started
+4 worker started
+5 worker started
+6 worker started
+7 worker started
+8 worker started
+9 worker started
+MAIN: Threads created
+1 worker reporting 0 / 10
+9 worker reporting 0 / 10
+\end{verbatim}
+
+І через декілька десятків рядків, завершальний блок:
+\begin{verbatim}
+6 worker reporting 9 / 10
+6 worker end
+MAIN: Threads joined
+100000
+Final count: 100000
+Total time:  511.19 s
+Throughput:  195.62 requests/sec
+\end{verbatim}
+
+
+
+\section{Лічильник без блокування}
+Застосунок отримує значення лічильника, інкрементує його всередині потоку застосунку
+ і записує назад в Hazelcast.
+Таким чином, блокування відсутні.
+\lstinputlisting[
+    language=python,
+    caption={app\_no\_block.py},
+    label={lst:appnoblock}
+]{app_no_block.py}
+
+Результати тестування:\\
+Час роботи: 3217 секунд\\
+Пропускна здатність: 31.08 запитів/с\\
+Кінцеве значення лічильника: 32582
+
+\section{Лічильник з песимістичним блокуванням}
+Застосунок блокує блок (або очікує доки може заблокувати), отримує значення лічильника, 
+інкрементує його всередині потоку застосунку, записує назад в Hazelcast та відпускає блок.
+\lstinputlisting[
+    language=python,
+    caption={app\_pessimistic\_block.py},
+    label={lst:apppessimisticblock}
+]{app_pessimistic_block.py}
+Задля економії часу, зменшено кількість запитів клієнтів з 10000 до 10.\\
+Результати тестування:\\
+Час роботи: 1290 секунд\\
+Пропускна здатність: 0.08 запитів/с\\
+Кінцеве значення лічильника: 100
+\end{document}

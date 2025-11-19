@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  hazelcast1:
+    image: hazelcast/hazelcast:5.4.0
+    container_name: hz-node1
+    ports:
+      - "5701:5701"
+    environment:
+      - HZ_NETWORK_JOIN_MULTICAST_ENABLED=false
+      - HZ_NETWORK_JOIN_TCPIP_ENABLED=true
+      - HZ_NETWORK_JOIN_TCPIP_MEMBERS=hazelcast1,hazelcast2,hazelcast3
+      - HZ_CP_MEMBER_COUNT=3
+      - JAVA_OPTS=-Dhazelcast.local.publicAddress=hazelcast1:5701
+    networks:
+      - hz-network
+
+  hazelcast2:
+    image: hazelcast/hazelcast:5.4.0
+    container_name: hz-node2
+    ports:
+      - "5702:5701"
+    environment:
+      - HZ_NETWORK_JOIN_MULTICAST_ENABLED=false
+      - HZ_NETWORK_JOIN_TCPIP_ENABLED=true
+      - HZ_NETWORK_JOIN_TCPIP_MEMBERS=hazelcast1,hazelcast2,hazelcast3
+      - HZ_CP_MEMBER_COUNT=3
+      - JAVA_OPTS=-Dhazelcast.local.publicAddress=hazelcast2:5701
+    depends_on:
+      - hazelcast1
+    networks:
+      - hz-network
+
+  hazelcast3:
+    image: hazelcast/hazelcast:5.4.0
+    container_name: hz-node3
+    ports:
+      - "5703:5701"
+    environment:
+      - HZ_NETWORK_JOIN_MULTICAST_ENABLED=false
+      - HZ_NETWORK_JOIN_TCPIP_ENABLED=true
+      - HZ_NETWORK_JOIN_TCPIP_MEMBERS=hazelcast1,hazelcast2,hazelcast3
+      - HZ_CP_MEMBER_COUNT=3
+      - JAVA_OPTS=-Dhazelcast.local.publicAddress=hazelcast3:5701
+    depends_on:
+      - hazelcast1
+    networks:
+      - hz-network
+
+  management-center:
+    image: hazelcast/management-center:5.4.0
+    container_name: hz-mc
+    ports:
+      - "8080:8080"
+    environment:
+      - MC_DEFAULT_CLUSTER=dev
+      - MC_DEFAULT_CLUSTER_MEMBERS=hazelcast1,hazelcast2,hazelcast3
+    depends_on:
+      - hazelcast1
+    networks:
+      - hz-network
+
+networks:
+  hz-network:
+    driver: bridge

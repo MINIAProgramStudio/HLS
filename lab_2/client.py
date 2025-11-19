@@ -2,23 +2,22 @@ import requests
 import threading
 import time
 import random
+from tqdm import tqdm
 
 SERVER = "http://127.0.0.1:8080"
-CALLS_PER_CLIENT = 1000
+CALLS_PER_CLIENT = 10
 NUM_CLIENTS = 10
 
 def worker(client_id):
-    print(client_id, "worker started")
-    for i in range(CALLS_PER_CLIENT):
+    for i in tqdm(range(CALLS_PER_CLIENT), desc = str(client_id)):
         trying = True
         while trying:
             try:
                 requests.get(f"{SERVER}/inc")
                 trying = False
             except requests.exceptions.RequestException:
-                print(client_id, "worker, request denied, i =",i)
+                print(client_id, "worker, request denied, N =",j*CALLS_PER_CLIENT//N_REPORTS + i)
                 time.sleep(random.random())
-    print(client_id, "worker end")
 
 def main():
     print(f"Starting {NUM_CLIENTS} clients x {CALLS_PER_CLIENT} calls each...")

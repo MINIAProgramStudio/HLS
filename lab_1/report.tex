@@ -93,12 +93,8 @@
 
 \section{Реалізація лічильника в оперативній пам'яті}
 \subsection{Сервер}
-Сервер реалізовано на \code{Python} з використанням модуля \code{Flask}.
-
-Оголошуються застосунок, лічильник та семафор (lock). 
-Визначаються ендпоінти які через семафор змінюють або читають лічильник.
-
-Сам застосунок є багатопотоковим, але однопроцессовим.
+Сервер реалізовано на \code{Python} з використанням модуля \code{Flask} 
+і зберіганням значення лічильника в змінній.
 
 Повний код застосунку:
 \begin{lstlisting}[language=Python]
@@ -107,22 +103,23 @@ import threading
 
 app = Flask(__name__)
 
-counter = [0]
+counter = 0
 lock = threading.Lock()
 
 @app.route("/inc")
 def inc():
     global counter
     with lock:
-        counter[0] += 1
+        c = counter            
+        counter = c + 1
+        return str(counter)
 
 @app.route("/count")
 def count():
-    with lock:
-        return str(counter[0])
+    with lock:            
+        return str(counter)
 \end{lstlisting}
-
-Повний код сервера:
+Код що запускає сервер та застосунок на ньому:
 \begin{lstlisting}[language=Python]
 from waitress import serve
 from app import app
@@ -145,17 +142,24 @@ if __name__ == "__main__":
 import requests
 import threading
 import time
+import random
 
 SERVER = "http://127.0.0.1:8080"
 CALLS_PER_CLIENT = 10_000
-NUM_CLIENTS = 1
+NUM_CLIENTS = 10
 
 def worker(client_id):
+    print(client_id, "worker started")
     for i in range(CALLS_PER_CLIENT):
-        try:
-            requests.get(f"{SERVER}/inc")
-        except requests.exceptions.RequestException:
-            pass
+        trying = True
+        while trying:
+            try:
+                requests.get(f"{SERVER}/inc")
+                trying = False
+            except requests.exceptions.RequestException:
+                print(client_id, "worker, request denied, i =",i)
+                time.sleep(random.random())
+    print(client_id, "worker end")
 
 def main():
     print(f"Starting {NUM_CLIENTS} clients x {CALLS_PER_CLIENT} calls each...")
@@ -166,17 +170,22 @@ def main():
         t = threading.Thread(target=worker, args=(i,))
         t.start()
         threads.append(t)
-
+    print("MAIN: Threads created")
     for t in threads:
         t.join()
-
+    print("MAIN: Threads joined")
     end = time.time()
     elapsed = end - start
-
-    try:
-        final_count = int(requests.get(f"{SERVER}/count").text)
-    except:
-        final_count = -1
+    final_count = -1
+    i = 0
+    while final_count == -1 and i < 5:
+        try:
+            final_count = int(requests.get(f"{SERVER}/count").text)
+            print(final_count)
+        except:
+            final_count = -1
+            i+=1
+            time.sleep(1)
 
     total_calls = CALLS_PER_CLIENT * NUM_CLIENTS
     throughput = total_calls / elapsed
@@ -193,28 +202,163 @@ if __name__ == "__main__":
 \section{Запити з лічильником в оперативній пам'яті}
 Приклад результату роботи \code{client.py}:
 \begin{verbatim}
-Starting 1 clients x 10000 calls each...
-Final count: 10000
-Total time:  19.81 s
-Throughput:  504.72 requests/sec
+Starting 10 clients x 10000 calls each...
+0 worker started
+1 worker started
+2 worker started
+3 worker started
+4 worker started
+5 worker started
+6 worker started
+7 worker started
+8 worker started
+9 worker started
+MAIN: Threads created
+7 worker, request denied, i = 6435
+0 worker, request denied, i = 6588
+7 worker, request denied, i = 6435
+9 worker end
+1 worker end
+0 worker end
+3 worker end
+2 worker end
+7 worker end
+5 worker end
+4 worker end
+8 worker end
+6 worker end
+MAIN: Threads joined
+100000
+Final count: 100000
+Total time:  173.60 s
+Throughput:  576.02 requests/sec
 \end{verbatim}
 
-Результати роботи системи:
+Результати роботи системи з записом в оперативну пам'ять:
 \begin{center}
 \begin{tabular}{ |c|c|c|c|c| } 
  \hline
  Клієнтів & Всього запитів & Лічильник & Час (s) & count/time (req/s)\\ 
  \hline
- 1 & 10 000 & 10 000 & 11.18 & 894.58\\ 
+ 1 & 10 000 & 10 000 & 11.81 & 846.85\\ 
  \hline
- 2 & 20 000 & 20 000 & 15.88 & 1259.47\\
+ 2 & 20 000 & 20 000 & 23.35 & 856.70\\
  \hline
- 5 & 50 000 & 50 000 & 34.70 & 1440.96\\
+ 5 & 50 000 & 50 000 & 67.23 & 743.67\\
  \hline
- 10 & 100 000 & 98 010 & 209.64 & 477.00\\
+ 10 & 100 000 & 100 000& 173.60 & 576.02\\
  \hline
 \end{tabular}
 \end{center}
 
+\section{Реалізація на PostgreSQL}
+В код застосунку додано функції під'єднання до бази даних та ініціалізації таблиці.
+Додано змінну яка показує застосунку де зберігати дані: на диску чи у оперативній пам'яті.
+
+Повний код застосунку:
+\begin{lstlisting}[language=Python]
+from flask import Flask
+import threading
+
+app = Flask(__name__)
+USE_DISK = True
+
+DB_HOST = ***
+DB_NAME = ***
+DB_USER = ***
+DB_PASS = ***
+DB_PORT = 5432
+
+if USE_DISK:
+    def get_conn():
+        return psycopg2.connect(
+            host=DB_HOST,
+            dbname=DB_NAME,
+            user=DB_USER,
+            password=DB_PASS,
+            port=DB_PORT
+        )
+    def init_db():
+        conn = get_conn()
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS counter (
+                id SERIAL PRIMARY KEY,
+                value BIGINT NOT NULL
+            );
+        """)
+        cur.execute("SELECT COUNT(*) FROM counter;")
+        if cur.fetchone()[0] == 0:
+            cur.execute("INSERT INTO counter (value) VALUES (0);")
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    init_db()
+
+    @app.route("/inc")
+    def inc():
+        conn = get_conn()
+        cur = conn.cursor()
+        cur.execute("UPDATE counter SET value = value + 1 RETURNING value;")
+        new_value = cur.fetchone()[0]
+        conn.commit()
+        cur.close()
+        conn.close()
+        return str(new_value)
+
+    @app.route("/count")
+    def count():
+        conn = get_conn()
+        cur = conn.cursor()
+        cur.execute("SELECT value FROM counter LIMIT 1;")
+        current_value = cur.fetchone()[0]
+        cur.close()
+        conn.close()
+        return str(current_value)
+else:
+    counter = 0
+    lock = threading.Lock()
+
+    @app.route("/inc")
+    def inc():
+        global counter
+        with lock:
+            c = counter
+            counter = c + 1
+            return str(counter)
+
+    @app.route("/count")
+    def count():
+        with lock:
+            return str(counter)
+\end{lstlisting}
+
+\section{Запити з лічильником на диску}
+Задля зменшення часу очікування (та зменшення шансів смерті старенького SSD) сумарна кількість запитів в усіх запусках рівна 10 000.
+\begin{center}
+\begin{tabular}{ |c|c|c|c|c| } 
+ \hline
+ Клієнтів & Всього запитів & Лічильник & Час (s) & count/time (req/s)\\ 
+ \hline
+ 1 & 10 000 & 10 000 & 392 & 25.48\\ 
+ \hline
+ 2 & 10 000 & 10 000 & 238 & 42.00\\
+ \hline
+ 5 & 10 000 & 10 000 & 115 & 86.50\\
+ \hline
+ 10 & 10 000 & 10 000& 115 & 86.33\\
+ \hline
+\end{tabular}
+\end{center}
+
+\section{Порівняння}
+Запис в базу даних в більш ніж 30 разів повільніший за оперативну пам'ять для одного клієнта, в 20 для двох,
+в 8.5 для п'яти і в 7 разів для десяти.
+
+Згідно отриманих даних, можна зробити припущення, що лічильник в оперативній пам'яті впирається в швидкість роботи застосунку майже одразу,
+тож після 2 клієнтів, подальші зменшують швидкість обробки запитів.
+
+Лічильник в базі даних впирається спочатку в швидкість формування запитів в БД на 1-2 клієнтах і впирається в швидкість запису самої БД на 5-10 клієнтах
 
 \end{document}
