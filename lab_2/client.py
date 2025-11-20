@@ -5,11 +5,14 @@ import random
 from tqdm import tqdm
 
 SERVER = "http://127.0.0.1:8080"
-CALLS_PER_CLIENT = 10
+CALLS_PER_CLIENT = 10_000
 NUM_CLIENTS = 10
 
+print_lock = threading.Lock()
+
 def worker(client_id):
-    for i in tqdm(range(CALLS_PER_CLIENT), desc = str(client_id)):
+    bar = tqdm(range(CALLS_PER_CLIENT), position=client_id, desc = str(client_id), leave=False)
+    for i in bar:
         trying = True
         while trying:
             try:
@@ -18,6 +21,8 @@ def worker(client_id):
             except requests.exceptions.RequestException:
                 print(client_id, "worker, request denied, N =",j*CALLS_PER_CLIENT//N_REPORTS + i)
                 time.sleep(random.random())
+    with print_lock:
+        bar.close()
 
 def main():
     print(f"Starting {NUM_CLIENTS} clients x {CALLS_PER_CLIENT} calls each...")
@@ -47,7 +52,7 @@ def main():
 
     total_calls = CALLS_PER_CLIENT * NUM_CLIENTS
     throughput = total_calls / elapsed
-
+    
     print(f"Final count: {final_count}")
     print(f"Total time:  {elapsed:.2f} s")
     print(f"Throughput:  {throughput:.2f} requests/sec")
