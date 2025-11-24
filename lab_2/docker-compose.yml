@@ -6,12 +6,10 @@ services:
     container_name: hz-node1
     ports:
       - "5701:5701"
+    volumes:
+      - ./hazelcast.yaml:/opt/hazelcast/config/hazelcast.yaml
     environment:
-      - HZ_NETWORK_JOIN_MULTICAST_ENABLED=false
-      - HZ_NETWORK_JOIN_TCPIP_ENABLED=true
-      - HZ_NETWORK_JOIN_TCPIP_MEMBERS=hazelcast1,hazelcast2,hazelcast3
-      - HZ_CP_MEMBER_COUNT=3
-      - JAVA_OPTS=-Dhazelcast.local.publicAddress=hazelcast1:5701
+      - JAVA_OPTS=-Dhazelcast.local.publicAddress=hazelcast1:5701 -Dhazelcast.config=/opt/hazelcast/config/hazelcast.yaml
     networks:
       - hz-network
 
@@ -20,12 +18,10 @@ services:
     container_name: hz-node2
     ports:
       - "5702:5701"
+    volumes:
+      - ./hazelcast.yaml:/opt/hazelcast/config/hazelcast.yaml
     environment:
-      - HZ_NETWORK_JOIN_MULTICAST_ENABLED=false
-      - HZ_NETWORK_JOIN_TCPIP_ENABLED=true
-      - HZ_NETWORK_JOIN_TCPIP_MEMBERS=hazelcast1,hazelcast2,hazelcast3
-      - HZ_CP_MEMBER_COUNT=3
-      - JAVA_OPTS=-Dhazelcast.local.publicAddress=hazelcast2:5701
+      - JAVA_OPTS=-Dhazelcast.local.publicAddress=hazelcast2:5701 -Dhazelcast.config=/opt/hazelcast/config/hazelcast.yaml
     depends_on:
       - hazelcast1
     networks:
@@ -36,12 +32,10 @@ services:
     container_name: hz-node3
     ports:
       - "5703:5701"
+    volumes:
+      - ./hazelcast.yaml:/opt/hazelcast/config/hazelcast.yaml
     environment:
-      - HZ_NETWORK_JOIN_MULTICAST_ENABLED=false
-      - HZ_NETWORK_JOIN_TCPIP_ENABLED=true
-      - HZ_NETWORK_JOIN_TCPIP_MEMBERS=hazelcast1,hazelcast2,hazelcast3
-      - HZ_CP_MEMBER_COUNT=3
-      - JAVA_OPTS=-Dhazelcast.local.publicAddress=hazelcast3:5701
+      - JAVA_OPTS=-Dhazelcast.local.publicAddress=hazelcast3:5701 -Dhazelcast.config=/opt/hazelcast/config/hazelcast.yaml
     depends_on:
       - hazelcast1
     networks:

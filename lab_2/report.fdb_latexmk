@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1763972212.96262 "c:/Users/misha/OneDrive/Документы/GitHub/HLS/lab_2/report.tex" "report.pdf" "report" 1763972215.63546 0
+["pdflatex"] 1763994734.64414 "c:/Users/misha/OneDrive/Документы/GitHub/HLS/lab_2/report.tex" "report.pdf" "report" 1763994736.56133 0
   "C:/Program Files/MiKTeX/fonts/tfm/jknappen/ec/tcrm1000.tfm" 993062508 1436 c7f957a372ef2fbe93c0982f96625e12 ""
   "C:/Program Files/MiKTeX/fonts/tfm/public/cm/cmmi12.tfm" 1136765053 1524 4414a8315f39513458b80dfc63bff03a ""
   "C:/Program Files/MiKTeX/fonts/tfm/public/cm/cmmi6.tfm" 1136765053 1512 f21f83efb36853c0b70002322c1ab3ad ""
@@ -90,15 +90,17 @@
   "C:/Users/misha/AppData/Roaming/MiKTeX/tex/latex/letltxmacro/letltxmacro.sty" 1575399536 5766 13a9e8766c47f30327caf893ece86ac8 ""
   "C:/Users/misha/AppData/Roaming/MiKTeX/tex/latex/refcount/refcount.sty" 1576433952 9878 9e94e8fa600d95f9c7731bb21dfb67a4 ""
   "C:/Users/misha/AppData/Roaming/MiKTeX/tex/latex/rerunfilecheck/rerunfilecheck.sty" 1657800696 9714 ba3194bd52c8499b3f1e3eb91d409670 ""
-  "app_no_block.py" 1763640618 879 d7a5b059949127b8ef91ba4400452dca ""
-  "app_optimistic_block.py" 1763968704 1134 4b6477e2972808b86c1e5a3be64af756 ""
-  "app_pessimistic_block.py" 1763967912 963 023e6b674afea979299e64758916b67f ""
-  "c:/Users/misha/OneDrive/Документы/GitHub/HLS/lab_2/report.tex" 1763972210 9504 f70c36478b46b41d59b079b55bb150c7 ""
+  "app_CP.py" 1763994733 638 2bb35fab640a9cafe99386d1290c8dbb ""
+  "app_no_block.py" 1763994734 739 45cb4d6a5ba76b74c683017dab8a0423 ""
+  "app_optimistic_block.py" 1763994735 1047 9d6cbcc5da3874cbc95cb16643744fc5 ""
+  "app_pessimistic_block.py" 1763994736 876 3c2ab517f76afce869314b9f7dcd1543 ""
+  "c:/Users/misha/OneDrive/Документы/GitHub/HLS/lab_2/report.tex" 1763994534 10862 ec6581c4d9c21dd663cd3319c283cae6 ""
   "client.py" 1763966844 1712 a79bffc84dbb692b9d5d6959a107a9e2 ""
-  "docker-compose.yml" 1763630468 1767 219a3fbc4f38fd61249252dce0913d32 ""
-  "report.aux" 1763972215 2388 f44c967e72309fe9e2761d90dcd9c159 "pdflatex"
-  "report.out" 1763972215 1833 00c0fb8539cbe1d59cb7ad5f2c7a31e5 "pdflatex"
-  "report.tex" 1763972210 9504 f70c36478b46b41d59b079b55bb150c7 ""
+  "docker-compose.yml" 1763992189 1583 63de38d88fa26caf19f6adbde5a6168d ""
+  "hazelcast.yaml" 1763992415 328 9308a6baef88de35f003d7278ccff0f0 ""
+  "report.aux" 1763994736 3161 620c9ec1861dc12aa405c7d5535e2325 "pdflatex"
+  "report.out" 1763994736 2358 ae117a96b3f8df0c09b8d03ba080bf94 "pdflatex"
+  "report.tex" 1763994534 10862 ec6581c4d9c21dd663cd3319c283cae6 ""
   (generated)
   "report.aux"
   "report.log"

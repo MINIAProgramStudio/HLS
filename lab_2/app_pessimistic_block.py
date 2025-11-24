@@ -38,7 +38,3 @@ def inc():
 def count():
     value = counter_map.get(COUNTER_NAME)
     return str(value)
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=False)

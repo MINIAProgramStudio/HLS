@@ -81,8 +81,8 @@
 
 \end{itemize}
 
-
-\section{Запуск Hazelcast }
+\section{Хід роботи}
+\subsection{Запуск Hazelcast }
 Hazelcast локально захощено через Docker. 
 Створюються три контейнери контейнери Hazelcast 5.4.0: \code{hz-node1}, \code{hz-node2}, \code{hz-node3} на портах 5701, 5702 та 5703 відповідно.
 Та контейнер Hazelcast management-center 5.4.0: \code{hz-mz} на порті 8080
@@ -94,15 +94,18 @@ Hazelcast локально захощено через Docker.
 
 Після запуску усі чотири контейнери запущені успішно і існує кластер з трьома нодами. Про це свідчить ця частина логу:
 \begin{verbatim}
-[ WARN] [main] [c.h.c.CPSubsystem]: [hazelcast3]:5701 [dev] [5.4.0] CP Subsystem is not enabled. CP data structures will operate in UNSAFE mode! Please note that UNSAFE mode will not provide strong consistency guarantees.
 Members {size:3, ver:3} [
     Member [hazelcast1]:5701 - 360c484e-0413-4f01-b810-edd4f20fb514
     Member [hazelcast2]:5701 - 912b48a7-4b31-4303-9e30-06560e463ef1
     Member [hazelcast3]:5701 - ae62cc6a-26c6-4188-b174-ce60c234888c this
 ]
 \end{verbatim}
-
-\section{Клієнт}
+CP система не запущена:
+\begin{verbatim}
+CP Subsystem is not enabled. CP data structures will operate in UNSAFE mode! 
+Please note that UNSAFE mode will not provide strong consistency guarantees.
+\end{verbatim}
+\subsection{Клієнт}
 Майже ідентичний клієнту реалізованому в першій лабораторній роботі.
 Додано лог проходження певної частки запитів, для розуміння чи просувається виконання запитів.
 \lstinputlisting[
@@ -139,7 +142,7 @@ Throughput:  90.43 requests/sec
 \end{verbatim}
 
 
-\section{Лічильник без блокування}
+\subsection{Лічильник без блокування}
 Застосунок отримує значення лічильника, інкрементує його всередині потоку застосунку
  і записує назад в Hazelcast.
 Таким чином, блокування відсутні.
@@ -154,7 +157,7 @@ Throughput:  90.43 requests/sec
 Пропускна здатність: 90.43 запитів/с\\
 Кінцеве значення лічильника: 47221
 
-\section{Лічильник з песимістичним блокуванням}
+\subsection{Лічильник з песимістичним блокуванням}
 Застосунок блокує блок (або очікує доки може заблокувати), отримує значення лічильника, 
 інкрементує його всередині потоку застосунку, записує назад в Hazelcast та відпускає блок.
 \lstinputlisting[
@@ -167,7 +170,7 @@ Throughput:  90.43 requests/sec
 Пропускна здатність: 26.79 запитів/с\\
 Кінцеве значення лічильника: 100к
 
-\section{Лічильник з оптимістичним блокуванням}
+\subsection{Лічильник з оптимістичним блокуванням}
 \lstinputlisting[
     language=python,
     caption={app\_optimistic\_block.py},
@@ -177,4 +180,47 @@ Throughput:  90.43 requests/sec
 Час роботи: 1964 секунди\\
 Пропускна здатність: 50.91 запитів/с\\
 Кінцеве значення лічильника: 100к
+
+\subsection{CP Subsystem та IAtomicLong}
+Додано файл \code{hazelcast.yaml} який вказує що необхідно активувати CP Subsystem
+\lstinputlisting[
+    language=yaml,
+    caption={hazelcast.yaml},
+    label={lst:hazelcast}
+]{hazelcast.yaml}
+
+В лозі нод наявне повідомлення:
+\begin{verbatim}
+CP Subsystem is enabled with 3 members.
+\end{verbatim}
+
+\lstinputlisting[
+    language=python,
+    caption={app\_CP.py},
+    label={lst:appCP}
+]{app_CP.py}
+
+Результати тестування:\\
+Час роботи: 1126 секунд\\
+Пропускна здатність: 88.74 запитів/с\\
+Кінцеве значення лічильника: 100к
+
+\section{Результати}
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+    \hline
+    Варіант блокування& Час роботи & Пропускна здатність & Значення лічильника \\
+    \hline
+    Відсутнє & 1106 & 90.43 & 47721 \\
+    \hline
+    Песимістичне & 3732 & 26.79 & 100k \\
+    \hline
+    Оптимістичне & 1964 & 50.91 & 100k \\
+    \hline
+    CP Subsystem & & &\\
+    IAtomicLong & 1126 & 88.74 & 100k\\
+    \hline
+\end{tabular}
+\end{center}
+
 \end{document}
