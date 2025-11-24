@@ -179,6 +179,9 @@ INPUT app_no_block.py
 INPUT .\app_pessimistic_block.py
 INPUT .\app_pessimistic_block.py
 INPUT app_pessimistic_block.py
+INPUT .\app_optimistic_block.py
+INPUT .\app_optimistic_block.py
+INPUT app_optimistic_block.py
 INPUT report.aux
 INPUT .\report.out
 INPUT .\report.out

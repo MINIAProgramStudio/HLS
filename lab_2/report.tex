@@ -132,10 +132,10 @@ MAIN: Threads created
 Starting 10 clients x 10000 calls each...
 MAIN: Threads created
 MAIN: Threads joined
-50663
-Final count: 50663
-Total time:  1184.66 s
-Throughput:  84.41 requests/sec
+47221
+Final count: 47221
+Total time:  1105.88 s
+Throughput:  90.43 requests/sec
 \end{verbatim}
 
 
@@ -150,9 +150,9 @@ Throughput:  84.41 requests/sec
 ]{app_no_block.py}
 
 Результати тестування:\\
-Час роботи: 1184 секунди\\
-Пропускна здатність: 84.41 запитів/с\\
-Кінцеве значення лічильника: 32582
+Час роботи: 1106 секунд\\
+Пропускна здатність: 90.43 запитів/с\\
+Кінцеве значення лічильника: 47221
 
 \section{Лічильник з песимістичним блокуванням}
 Застосунок блокує блок (або очікує доки може заблокувати), отримує значення лічильника, 
@@ -162,9 +162,19 @@ Throughput:  84.41 requests/sec
     caption={app\_pessimistic\_block.py},
     label={lst:apppessimisticblock}
 ]{app_pessimistic_block.py}
-Задля економії часу, зменшено кількість запитів клієнтів з 10000 до 10.\\
 Результати тестування:\\
-Час роботи: 1290 секунд\\
-Пропускна здатність: 0.08 запитів/с\\
-Кінцеве значення лічильника: 100
+Час роботи: 3732 секунд\\
+Пропускна здатність: 26.79 запитів/с\\
+Кінцеве значення лічильника: 100к
+
+\section{Лічильник з оптимістичним блокуванням}
+\lstinputlisting[
+    language=python,
+    caption={app\_optimistic\_block.py},
+    label={lst:appoptimisticblock}
+]{app_optimistic_block.py}
+Результати тестування:\\
+Час роботи: 1964 секунди\\
+Пропускна здатність: 50.91 запитів/с\\
+Кінцеве значення лічильника: 100к
 \end{document}

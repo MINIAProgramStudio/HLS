@@ -4,7 +4,7 @@ import time
 import random
 from tqdm import tqdm
 
-SERVER = "http://127.0.0.1:8080"
+SERVER = "http://127.0.0.1:5000"
 CALLS_PER_CLIENT = 10_000
 NUM_CLIENTS = 10
 
@@ -19,7 +19,7 @@ def worker(client_id):
                 requests.get(f"{SERVER}/inc")
                 trying = False
             except requests.exceptions.RequestException:
-                print(client_id, "worker, request denied, N =",j*CALLS_PER_CLIENT//N_REPORTS + i)
+                print(client_id, "worker, request denied, N =",i)
                 time.sleep(random.random())
     with print_lock:
         bar.close()

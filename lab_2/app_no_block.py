@@ -11,12 +11,11 @@ HZ_ADDRESSES = [
     "127.0.0.1:5703"
 ]
 
-COUNTER_NAME = "likes-counter"
+COUNTER_NAME = "likes"
 
 print("Connecting to Hazelcast...")
 client = HazelcastClient(
-    cluster_members=HZ_ADDRESSES,
-    cluster_name="dev",
+    cluster_members=HZ_ADDRESSES
 )
 
 cp = client.cp_subsystem
