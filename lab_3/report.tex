@@ -1,0 +1,196 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[ukrainian]{babel}
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
+\title{Проєктування високонавантаженних систем. Лабораторна 3, звіт}
+\author{Михайло Голуб}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=t,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+\lstdefinelanguage{YAML}{
+  keywords={true,false,null,y,n},
+  keywordstyle=\color{blue}\bfseries,
+  basicstyle=\ttfamily,
+  sensitive=false,
+  comment=[l]{\#},
+  commentstyle=\color{gray}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  moredelim=[l]{:},
+  morestring=[b]',
+  morestring=[b]"
+}
+\graphicspath{ {./img/} }
+
+\def\code#1{\texttt{#1}}
+\begin{document}
+\maketitle
+\section{Завдання лабораторної роботи}
+\subsection{Загальне}
+Необхідно декількома способами резалізувати оновлення значення каунтера в
+СКБД PostgreSQL та оцінити час кожного із варіантів.
+
+Таблиця \code{user_counter} з колонками \code{USER_ID}, \code{Counter}, \code{Version}.
+
+\begin{enumerate}
+    \item Lost-update
+    \item Serializable update
+    \item In-place update
+    \item Row-level locking
+    \item Optimistic concurrency control
+\end{enumerate}
+
+\subsection{Вимоги до звіту та реалізації}
+\begin{itemize}
+    \item Мова реалізації будь-яка
+    \item Не використовувати ORM-фреймворки (Hibernate, SQLAlchemy, …)
+    \item Не забувати про необхідність окремої транзакції на кожен запис
+\end{itemize}
+
+\section{Хід роботи}
+\subsection{Реалізація клієнта}
+\lstinputlisting[
+    language=python,
+    caption={lost_update.py},
+    label={lst:client}
+]{lost_update.py}
+
+Приклад логу під час роботи клієнта:
+\begin{verbatim}
+Lost-upddate
+Initialising DB
+DB initialised.
+Counter state: 0
+Starting 10 clients x 10000 calls each...
+MAIN: Threads created
+0:   0%| 42/10000 [00:03<10:55, 15.20it/s]
+1:   0%| 44/10000 [00:03<11:07, 14.92it/s]
+2:   0%| 44/10000 [00:03<11:21, 14.62it/s]
+3:   0%| 44/10000 [00:03<10:48, 15.35it/s]
+4:   0%| 40/10000 [00:02<11:04, 14.98it/s]
+5:   0%| 43/10000 [00:03<14:04, 11.79it/s]
+6:   0%| 44/10000 [00:03<11:08, 14.90it/s]
+7:   0%| 42/10000 [00:03<12:22, 13.41it/s]
+8:   0%| 43/10000 [00:03<12:32, 13.22it/s]
+9:   0%| 46/10000 [00:03<11:12, 14.79it/s]
+\end{verbatim}
+
+Приклад логу після завершення роботи клієнта:
+\begin{verbatim}
+Starting 10 clients x 10000 calls each...
+MAIN: Threads created
+MAIN: Threads joined
+47221
+Final count: 47221
+Total time:  1105.88 s
+Throughput:  90.43 requests/sec
+\end{verbatim}
+
+
+\subsection{Лічильник без блокування}
+Застосунок отримує значення лічильника, інкрементує його всередині потоку застосунку
+ і записує назад в Hazelcast.
+Таким чином, блокування відсутні.
+\lstinputlisting[
+    language=python,
+    caption={app\_no\_block.py},
+    label={lst:appnoblock}
+]{app_no_block.py}
+
+Результати тестування:\\
+Час роботи: 1106 секунд\\
+Пропускна здатність: 90.43 запитів/с\\
+Кінцеве значення лічильника: 47221
+
+\subsection{Лічильник з песимістичним блокуванням}
+Застосунок блокує блок (або очікує доки може заблокувати), отримує значення лічильника, 
+інкрементує його всередині потоку застосунку, записує назад в Hazelcast та відпускає блок.
+\lstinputlisting[
+    language=python,
+    caption={app\_pessimistic\_block.py},
+    label={lst:apppessimisticblock}
+]{app_pessimistic_block.py}
+Результати тестування:\\
+Час роботи: 3732 секунд\\
+Пропускна здатність: 26.79 запитів/с\\
+Кінцеве значення лічильника: 100к
+
+\subsection{Лічильник з оптимістичним блокуванням}
+\lstinputlisting[
+    language=python,
+    caption={app\_optimistic\_block.py},
+    label={lst:appoptimisticblock}
+]{app_optimistic_block.py}
+Результати тестування:\\
+Час роботи: 1964 секунди\\
+Пропускна здатність: 50.91 запитів/с\\
+Кінцеве значення лічильника: 100к
+
+\subsection{CP Subsystem та IAtomicLong}
+Додано файл \code{hazelcast.yaml} який вказує що необхідно активувати CP Subsystem
+\lstinputlisting[
+    language=yaml,
+    caption={hazelcast.yaml},
+    label={lst:hazelcast}
+]{hazelcast.yaml}
+
+В лозі нод наявне повідомлення:
+\begin{verbatim}
+CP Subsystem is enabled with 3 members.
+\end{verbatim}
+
+\lstinputlisting[
+    language=python,
+    caption={app\_CP.py},
+    label={lst:appCP}
+]{app_CP.py}
+
+Результати тестування:\\
+Час роботи: 1126 секунд\\
+Пропускна здатність: 88.74 запитів/с\\
+Кінцеве значення лічильника: 100к
+
+\section{Результати}
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+    \hline
+    Варіант блокування& Час роботи & Пропускна здатність & Значення лічильника \\
+    \hline
+    Відсутнє & 1106 & 90.43 & 47721 \\
+    \hline
+    Песимістичне & 3732 & 26.79 & 100k \\
+    \hline
+    Оптимістичне & 1964 & 50.91 & 100k \\
+    \hline
+    CP Subsystem & & &\\
+    IAtomicLong & 1126 & 88.74 & 100k\\
+    \hline
+\end{tabular}
+\end{center}
+
+\end{document}
