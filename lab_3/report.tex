@@ -55,7 +55,7 @@
 Необхідно декількома способами резалізувати оновлення значення каунтера в
 СКБД PostgreSQL та оцінити час кожного із варіантів.
 
-Таблиця \code{user_counter} з колонками \code{USER_ID}, \code{Counter}, \code{Version}.
+Таблиця \code{user\_counter} з колонками \code{USER\_ID}, \code{Counter}, \code{Version}.
 
 \begin{enumerate}
     \item Lost-update
@@ -68,7 +68,7 @@
 \subsection{Вимоги до звіту та реалізації}
 \begin{itemize}
     \item Мова реалізації будь-яка
-    \item Не використовувати ORM-фреймворки (Hibernate, SQLAlchemy, …)
+    \item Не використовувати ORM-фреймворки (Hibernate, SQLAlchemy, \dots)
     \item Не забувати про необхідність окремої транзакції на кожен запис
 \end{itemize}
 
@@ -76,9 +76,9 @@
 \subsection{Реалізація клієнта}
 \lstinputlisting[
     language=python,
-    caption={lost_update.py},
-    label={lst:client}
-]{lost_update.py}
+    caption={lost\_update\_or\_serialize.py},
+    label={lst:US}
+]{lost_update_or_serialize.py}
 
 Приклад логу під час роботи клієнта:
 \begin{verbatim}
@@ -102,94 +102,121 @@ MAIN: Threads created
 
 Приклад логу після завершення роботи клієнта:
 \begin{verbatim}
+Lost-upddate
+Initialising DB
+DB initialised.
+Counter state: 0
 Starting 10 clients x 10000 calls each...
 MAIN: Threads created
 MAIN: Threads joined
-47221
-Final count: 47221
-Total time:  1105.88 s
-Throughput:  90.43 requests/sec
+DB initialised.
+Final count: 10661
+Total time:  15.21 s
+Throughput:  6573.22 requests/sec
 \end{verbatim}
 
-
-\subsection{Лічильник без блокування}
-Застосунок отримує значення лічильника, інкрементує його всередині потоку застосунку
- і записує назад в Hazelcast.
-Таким чином, блокування відсутні.
-\lstinputlisting[
-    language=python,
-    caption={app\_no\_block.py},
-    label={lst:appnoblock}
-]{app_no_block.py}
+\subsection{Lost-update}
+Лістинг об'єднаного lost-update та Serializable (тип роботи обирається змінною) клієнта був наведений вище.\\
 
 Результати тестування:\\
-Час роботи: 1106 секунд\\
-Пропускна здатність: 90.43 запитів/с\\
-Кінцеве значення лічильника: 47221
+Час роботи: 15.21 секунди\\
+Пропускна здатність: 6573 запитів/с\\
+Кінцеве значення лічильника: 10661
 
-\subsection{Лічильник з песимістичним блокуванням}
-Застосунок блокує блок (або очікує доки може заблокувати), отримує значення лічильника, 
-інкрементує його всередині потоку застосунку, записує назад в Hazelcast та відпускає блок.
-\lstinputlisting[
-    language=python,
-    caption={app\_pessimistic\_block.py},
-    label={lst:apppessimisticblock}
-]{app_pessimistic_block.py}
-Результати тестування:\\
-Час роботи: 3732 секунд\\
-Пропускна здатність: 26.79 запитів/с\\
-Кінцеве значення лічильника: 100к
-
-\subsection{Лічильник з оптимістичним блокуванням}
-\lstinputlisting[
-    language=python,
-    caption={app\_optimistic\_block.py},
-    label={lst:appoptimisticblock}
-]{app_optimistic_block.py}
-Результати тестування:\\
-Час роботи: 1964 секунди\\
-Пропускна здатність: 50.91 запитів/с\\
-Кінцеве значення лічильника: 100к
-
-\subsection{CP Subsystem та IAtomicLong}
-Додано файл \code{hazelcast.yaml} який вказує що необхідно активувати CP Subsystem
-\lstinputlisting[
-    language=yaml,
-    caption={hazelcast.yaml},
-    label={lst:hazelcast}
-]{hazelcast.yaml}
-
-В лозі нод наявне повідомлення:
+\subsection{Serializable}
+При запуску таких самих запитів, але з рівнем ізоляції SERIALIZABLE,
+програма видає наступну помилку на всіх воркерах, окрім одного:
 \begin{verbatim}
-CP Subsystem is enabled with 3 members.
+cur.execute("UPDATE user_counter SET counter = %s WHERE user_id = %s", (counter, 1))
+psycopg2.errors.SerializationFailure: 
+ПОМИЛКА:  не вдалося серіалізувати доступ через паралельне оновлення
 \end{verbatim}
+
+Результати тестування:\\
+Час роботи: 3 секунди\\
+Пропускна здатність: --- запитів/с\\
+Кінцеве значення лічильника: 10к
+
+З певного моменту, лише один клієнт робив інкрементацію лічильника.
+
+Таку помилкову поведінку можна виправити використавши In-place update 
+або робити повторні запити у разі помилки.
+
+\subsection{Serializable з повтором}
+Якщо додати до Serializable повторний запит до таблиці у разі отримання помилки серіалізації,
+можна отримати щось що схоже на оптимістичне блокування:
+якщо все ок -- підтвердити операцію; 
+якщо не вдалося серіалізувати операції -- повернути помилку, 
+клієнти очікують випадковий час і пробують зробити операцію знову
 
 \lstinputlisting[
     language=python,
-    caption={app\_CP.py},
-    label={lst:appCP}
-]{app_CP.py}
+    caption={serialize\_and\_repeat.py},
+    label={lst:SR}
+]{serialize_and_repeat.py}
 
 Результати тестування:\\
-Час роботи: 1126 секунд\\
-Пропускна здатність: 88.74 запитів/с\\
+Час роботи: 860 секунд\\
+Пропускна здатність: 116.15 запитів/с\\
 Кінцеве значення лічильника: 100к
 
+\subsection{In-place update}
+\lstinputlisting[
+    language=python,
+    caption={Inplace.py},
+    label={lst:IPU}
+]{Inplace.py}
+
+Результати тестування:\\
+Час роботи: 12.56 секунд\\
+Пропускна здатність: 7963.53 запитів/с\\
+Кінцеве значення лічильника: 100к
+
+\subsection{Row-level locking}
+\lstinputlisting[
+    language=python,
+    caption={Rowlevel.py},
+    label={lst:RL}
+]{Rowlevel.py}
+
+Результати тестування:\\
+Час роботи: 20.06 секунд\\
+Пропускна здатність: 4985.25 запитів/с\\
+Кінцеве значення лічильника: 100к
+
+\subsection{Optimistic concurrency control}
+
+\lstinputlisting[
+    language=python,
+    caption={Optimistic.py},
+    label={lst:RL}
+]{Optimistic.py}
+
+Результати тестування:\\
+Час роботи: 88 секунд\\
+Пропускна здатність: 1136.31 запитів/с\\
+Кінцеве значення лічильника: 100к
+
+\newpage
 \section{Результати}
 \begin{center}
 \begin{tabular}{| c | c | c | c |}
     \hline
-    Варіант блокування& Час роботи & Пропускна здатність & Значення лічильника \\
+    Варіант & Час роботи & Пропускна здатність & Значення лічильника \\
     \hline
-    Відсутнє & 1106 & 90.43 & 47721 \\
+    Lost-update & 15.21 & 6573 & 10661 \\
     \hline
-    Песимістичне & 3732 & 26.79 & 100k \\
+    Serializable & 3 & --- & 10к \\
     \hline
-    Оптимістичне & 1964 & 50.91 & 100k \\
+    Ser. з повтором & 860 & 116.15 & 100k \\
     \hline
-    CP Subsystem & & &\\
-    IAtomicLong & 1126 & 88.74 & 100k\\
+    Inplace update & 12.56 & 7963 & 100k\\
     \hline
+    Row-level locking & 20.06 & 4985 & 100k\\
+    \hline
+    Optimistic concurrency control & 88 & 1136.31 & 100k\\
+    \hline
+    
 \end{tabular}
 \end{center}
 

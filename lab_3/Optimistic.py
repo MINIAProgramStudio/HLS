@@ -4,6 +4,8 @@ import random
 from tqdm import tqdm
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from psycopg2 import extensions
+
 
 DB_HOST = "localhost"
 DB_NAME = "HLS"
@@ -17,12 +19,12 @@ print_lock = threading.Lock()
 
 def get_conn():
     return psycopg2.connect(
-        host=DB_HOST,
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASS,
-        port=DB_PORT
-    )
+            host=DB_HOST,
+            dbname=DB_NAME,
+            user=DB_USER,
+            password=DB_PASS,
+            port=DB_PORT
+        )
 def init_db():
     conn = get_conn()
     cur = conn.cursor()
@@ -42,21 +44,25 @@ def init_db():
 
 def worker(client_id):
     bar = tqdm(range(CALLS_PER_CLIENT), position=client_id, desc = str(client_id), leave=False)
+    conn = get_conn()
+    cur = conn.cursor()
     for i in bar:
-        conn = get_conn()
-        cur = conn.cursor()
-        cur.execute("SELECT counter FROM user_counter WHERE user_id = 1")
-        counter = cur.fetchone()[0]
-        counter += 1
-        cur.execute("UPDATE user_counter SET counter = %s WHERE user_id = %s", (counter, 1))
-        conn.commit()
-        cur.close()
-        conn.close()
+        while True:
+            cur.execute("SELECT Counter, Version FROM user_counter WHERE USER_ID = 1")
+            counter, version = cur.fetchone()
+            counter = counter + 1
+            cur.execute("update user_counter set counter = %s, version = %s where user_id = %s and version = %s", 
+                        (counter, version + 1, 1, version))
+            conn.commit()
+            count = cur.rowcount
+            if (count > 0): break
+    cur.close()
+    conn.close()
     with print_lock:
         bar.close()
 
 def main():
-    print("Lost-upddate")
+    print("Row-level locking")
     print("Initialising DB")
     init_db()
     time.sleep(1)

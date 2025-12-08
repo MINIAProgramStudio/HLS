@@ -120,13 +120,19 @@ INPUT C:\Program Files\MiKTeX\tex\latex\l3backend\l3backend-pdftex.def
 INPUT .\report.aux
 INPUT .\report.aux
 INPUT report.aux
-OUTPUT report.aux
 INPUT C:\Program Files\MiKTeX\tex\latex\cyrillic\t2acmr.fd
 INPUT C:\Program Files\MiKTeX\tex\latex\cyrillic\t2acmr.fd
 INPUT C:\Program Files\MiKTeX\tex\latex\cyrillic\t2acmr.fd
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\tfm\lh\lh-t2a\larm1000.tfm
-OUTPUT report.out
+OUTPUT report.aux
+INPUT .\report.out
+INPUT .\report.out
+INPUT report.out
+INPUT report.out
 OUTPUT report.pdf
+INPUT .\report.out
+INPUT .\report.out
+OUTPUT report.out
 INPUT C:\Program Files\MiKTeX\tex\context\base\mkii\supp-pdf.mkii
 INPUT C:\Program Files\MiKTeX\tex\context\base\mkii\supp-pdf.mkii
 INPUT C:\Program Files\MiKTeX\tex\context\base\mkii\supp-pdf.mkii
@@ -157,10 +163,43 @@ INPUT C:\Program Files\MiKTeX\fonts\tfm\jknappen\ec\tcrm1000.tfm
 INPUT C:\Program Files\MiKTeX\tex\latex\listings\lstlang1.sty
 INPUT C:\Program Files\MiKTeX\tex\latex\listings\lstlang1.sty
 INPUT C:\Program Files\MiKTeX\tex\latex\listings\lstlang1.sty
-INPUT .\lost_update.py
-INPUT .\lost_update.py
+INPUT .\lost_update_or_serialize.py
+INPUT .\lost_update_or_serialize.py
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\tfm\lh\lh-t2a\latt0800.tfm
-INPUT lost_update.py
+INPUT lost_update_or_serialize.py
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\tfm\lh\lh-t2a\larm0800.tfm
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\tfm\lh\lh-t2a\larm0500.tfm
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\map\pdftex\pdftex.map
+INPUT .\serialize_and_repeat.py
+INPUT .\serialize_and_repeat.py
+INPUT serialize_and_repeat.py
+INPUT .\Inplace.py
+INPUT .\Inplace.py
+INPUT Inplace.py
+INPUT .\Rowlevel.py
+INPUT .\Rowlevel.py
+INPUT Rowlevel.py
+INPUT .\Optimistic.py
+INPUT .\Optimistic.py
+INPUT Optimistic.py
+INPUT report.aux
+INPUT .\report.out
+INPUT .\report.out
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\latt0800.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\latt0800.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\larm0500.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\larm0500.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\jknappen\ec\dpi600\tcrm1000.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\jknappen\ec\dpi600\tcrm1000.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\latt1000.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\latt1000.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\larm1000.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\larm1000.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\labx1200.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\labx1200.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\labx1440.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\labx1440.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\larm1200.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\larm1200.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\larm1728.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\larm1728.pk
