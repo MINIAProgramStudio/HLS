@@ -1,0 +1,253 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[ukrainian]{babel}
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
+\title{Проєктування високонавантаженних систем. Лабораторна 3, звіт}
+\author{Михайло Голуб}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=t,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+\lstdefinelanguage{YAML}{
+  keywords={true,false,null,y,n},
+  keywordstyle=\color{blue}\bfseries,
+  basicstyle=\ttfamily,
+  sensitive=false,
+  comment=[l]{\#},
+  commentstyle=\color{gray}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  moredelim=[l]{:},
+  morestring=[b]',
+  morestring=[b]"
+}
+\graphicspath{ {./img/} }
+
+\def\code#1{\texttt{#1}}
+\begin{document}
+\maketitle
+\section{Завдання лабораторної роботи}
+\subsection{Загальне}
+Необхідно декількома способами резалізувати оновлення значення каунтера в
+СКБД PostgreSQL та оцінити час кожного із варіантів.
+
+Таблиця \code{user\_counter} з колонками \code{USER\_ID}, \code{Counter}, \code{Version}.
+
+\begin{enumerate}
+    \item Lost-update
+    \item Serializable update
+    \item In-place update
+    \item Row-level locking
+    \item Optimistic concurrency control
+\end{enumerate}
+
+\subsection{Вимоги до звіту та реалізації}
+\begin{itemize}
+    \item Мова реалізації будь-яка
+    \item Не використовувати ORM-фреймворки (Hibernate, SQLAlchemy, \dots)
+    \item Не забувати про необхідність окремої транзакції на кожен запис
+\end{itemize}
+
+\section{Хід роботи}
+\subsection{Реалізація MongoDB}
+MongoDB запущена через Docker відповідним docker-compose:
+\lstinputlisting[
+    language=yaml,
+    caption={docker-compose.yml},
+    label={lst:US}
+]{docker-compose.yml}
+
+Після запуску контейнерів, виконано наступні команди для ініціалізації:
+\fontsize{6}{1}{
+\begin{verbatim}
+C:\Users\misha>docker exec -it mongo1 mongosh
+Current Mongosh Log ID: 6937fe96dd0696c23c9dc29c
+Connecting to:          mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.5.9
+Using MongoDB:          7.0.26
+Using Mongosh:          2.5.9
+
+For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
+
+------
+   The server generated these startup warnings when booting
+   2025-12-09T10:33:29.459+00:00: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/core/prodnotes-filesystem
+   2025-12-09T10:33:30.143+00:00: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+   2025-12-09T10:33:30.143+00:00: For customers running MongoDB 7.0, we suggest changing the contents of the following sysfsFile
+   2025-12-09T10:33:30.143+00:00: vm.max_map_count is too low
+------
+
+test> rs.initiate({
+...   _id: "rs0",
+...   members: [
+...     { _id: 0, host: "mongo1:27017" },
+...     { _id: 1, host: "mongo2:27017" },
+...     { _id: 2, host: "mongo3:27017" }
+...   ]
+... })
+{ ok: 1 }
+rs0 [direct: other] test> rs.status()
+{
+  set: 'rs0',
+  date: ISODate('2025-12-09T10:53:43.182Z'),
+  myState: 1,
+  term: Long('1'),
+  syncSourceHost: '',
+  syncSourceId: -1,
+  heartbeatIntervalMillis: Long('2000'),
+  majorityVoteCount: 2,
+  writeMajorityCount: 2,
+  votingMembersCount: 3,
+  writableVotingMembersCount: 3,
+  optimes: {
+    lastCommittedOpTime: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
+    lastCommittedWallTime: ISODate('2025-12-09T10:53:30.172Z'),
+    readConcernMajorityOpTime: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
+    appliedOpTime: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
+    durableOpTime: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
+    lastAppliedWallTime: ISODate('2025-12-09T10:53:30.172Z'),
+    lastDurableWallTime: ISODate('2025-12-09T10:53:30.172Z')
+  },
+  lastStableRecoveryTimestamp: Timestamp({ t: 1765277569, i: 1 }),
+  electionCandidateMetrics: {
+    lastElectionReason: 'electionTimeout',
+    lastElectionDate: ISODate('2025-12-09T10:49:09.524Z'),
+    electionTerm: Long('1'),
+    lastCommittedOpTimeAtElection: { ts: Timestamp({ t: 1765277339, i: 1 }), t: Long('-1') },
+    lastSeenOpTimeAtElection: { ts: Timestamp({ t: 1765277339, i: 1 }), t: Long('-1') },
+    numVotesNeeded: 2,
+    priorityAtElection: 1,
+    electionTimeoutMillis: Long('10000'),
+    numCatchUpOps: Long('0'),
+    newTermStartDate: ISODate('2025-12-09T10:49:09.567Z'),
+    wMajorityWriteAvailabilityDate: ISODate('2025-12-09T10:49:10.083Z')
+  },
+  members: [
+    {
+      _id: 0,
+      name: 'mongo1:27017',
+      health: 1,
+      state: 1,
+      stateStr: 'PRIMARY',
+      uptime: 1214,
+      optime: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
+      optimeDate: ISODate('2025-12-09T10:53:30.000Z'),
+      lastAppliedWallTime: ISODate('2025-12-09T10:53:30.172Z'),
+      lastDurableWallTime: ISODate('2025-12-09T10:53:30.172Z'),
+      syncSourceHost: '',
+      syncSourceId: -1,
+      infoMessage: '',
+      electionTime: Timestamp({ t: 1765277349, i: 1 }),
+      electionDate: ISODate('2025-12-09T10:49:09.000Z'),
+      configVersion: 1,
+      configTerm: 1,
+      self: true,
+      lastHeartbeatMessage: ''
+    },
+    {
+      _id: 1,
+      name: 'mongo2:27017',
+      health: 1,
+      state: 2,
+      stateStr: 'SECONDARY',
+      uptime: 283,
+      optime: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
+      optimeDurable: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
+      optimeDate: ISODate('2025-12-09T10:53:30.000Z'),
+      optimeDurableDate: ISODate('2025-12-09T10:53:30.000Z'),
+      lastAppliedWallTime: ISODate('2025-12-09T10:53:30.172Z'),
+      lastDurableWallTime: ISODate('2025-12-09T10:53:30.172Z'),
+      lastHeartbeat: ISODate('2025-12-09T10:53:41.546Z'),
+      lastHeartbeatRecv: ISODate('2025-12-09T10:53:42.547Z'),
+      pingMs: Long('0'),
+      lastHeartbeatMessage: '',
+      syncSourceHost: 'mongo1:27017',
+      syncSourceId: 0,
+      infoMessage: '',
+      configVersion: 1,
+      configTerm: 1
+    },
+    {
+      _id: 2,
+      name: 'mongo3:27017',
+      health: 1,
+      state: 2,
+      stateStr: 'SECONDARY',
+      uptime: 283,
+      optime: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
+      optimeDurable: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
+      optimeDate: ISODate('2025-12-09T10:53:30.000Z'),
+      optimeDurableDate: ISODate('2025-12-09T10:53:30.000Z'),
+      lastAppliedWallTime: ISODate('2025-12-09T10:53:30.172Z'),
+      lastDurableWallTime: ISODate('2025-12-09T10:53:30.172Z'),
+      lastHeartbeat: ISODate('2025-12-09T10:53:41.546Z'),
+      lastHeartbeatRecv: ISODate('2025-12-09T10:53:42.546Z'),
+      pingMs: Long('0'),
+      lastHeartbeatMessage: '',
+      syncSourceHost: 'mongo1:27017',
+      syncSourceId: 0,
+      infoMessage: '',
+      configVersion: 1,
+      configTerm: 1
+    }
+  ],
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1765277610, i: 4 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1765277610, i: 4 })
+}
+\end{verbatim}}
+
+Як видно з логу, вибори проведені і є Primary.
+
+\section{Результати}
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+    \hline
+    Варіант & Час роботи & Пропускна здатність & Значення лічильника \\
+    \hline
+    Lost-update & 15.21 & 6573 & 10661 \\
+    \hline
+    Serializable & 3 & --- & 10к \\
+    \hline
+    Ser. з повтором & 860 & 116.15 & 100k \\
+    \hline
+    Inplace update & 12.56 & 7963 & 100k\\
+    \hline
+    Row-level locking & 20.06 & 4985 & 100k\\
+    \hline
+    Optimistic concurrency control & 88 & 1136.31 & 100k\\
+    \hline
+    
+\end{tabular}
+\end{center}
+
+\end{document}
