@@ -2,7 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[ukrainian]{babel}
 \PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
-\title{Проєктування високонавантаженних систем. Лабораторна 3, звіт}
+\title{Проєктування високонавантаженних систем. Лабораторна 4, звіт}
 \author{Михайло Голуб}
 \usepackage{graphicx}
 \usepackage{listings}
@@ -51,25 +51,31 @@
 \begin{document}
 \maketitle
 \section{Завдання лабораторної роботи}
-\subsection{Загальне}
-Необхідно декількома способами резалізувати оновлення значення каунтера в
-СКБД PostgreSQL та оцінити час кожного із варіантів.
-
-Таблиця \code{user\_counter} з колонками \code{USER\_ID}, \code{Counter}, \code{Version}.
-
+\subsection{Налаштування реплікації}
 \begin{enumerate}
-    \item Lost-update
-    \item Serializable update
-    \item In-place update
-    \item Row-level locking
-    \item Optimistic concurrency control
+    \item Налаштувати реплікацію в конфігурації: Primary with Two Secondary Members (P-S-S) (всі ноди можуть бути запущені як окремі процеси або у Docker контейнерах)
+    \item Спробувати зробити запис з однією відключеною нодою та write concern рівнім 3 та нескінченім таймаутом. Спробувати під час таймаута включити відключену ноду 
+    \item Аналогічно попередньому пункту, але задати скінченний таймаут та дочекатись його закінчення. Перевірити чи данні записались і чи доступні на читання з рівнем readConcern: “majority”
+    \item Продемонструвати перевибори primary node відключивши поточний primary (Replica Set Elections)	і що після відновлення роботи старої primary на неї реплікуються нові дані, які з'явилися під час її простою
 \end{enumerate}
+
+\subsection{Аналіз продуктивності та перевірка цілісності}
+Аналогічно попереднім завданням, необхідно буде створити колекцію (таблицю) з каунтером лайків. Далі з 10 окремих клієнтів одночасно запустити інкерементацію каунтеру лайків по 10\_000 на кожного клієнта з різними опціями взаємодії з MongoDB.
+
+\begin{itemize}
+  \item Вказавши у парметрах \code{findOneAndUpdate writeConcern = 1} (це буде означати, що запис іде тільки на Primary ноду і не чекає відповіді від Secondary), запустіть 10 клієнтів  з інкрементом по 10\_000 на кожному з них. Виміряйте час виконання та перевірте чи кінцеве значення буде дорівнювати очікуваному - 100К
+  \item Вказавши у парметрах \code{findOneAndUpdate writeConcern = majority} (це буде означати, що Primary чекає поки значення запишется на більшість нод), запустіть 10 клієнтів  з інкрементом по 10\_000 на кожному з них. Виміряйте час виконання та перевірте чи кінцеве значення буде дорівнювати очікуваному - 100К
+  \item Повторно запустить код при \code{writeConcern = 1}, але тепер під час роботи відключіть Primary ноду і подивитись що буде обрана інша Primary нода, яка продовжить обробку запитів, і чи кінцевий результат буде коректним.
+  \item Повторно запустить код при \code{writeConcern = majority}, але тепер під час роботи відключіть Primary ноду і подивитись що буде обрана інша Primary нода, яка продовжить обробку запитів, і чи кінцевий результат буде коректним. 
+\end{itemize}
+
+При \code{writeConcern = 1} деякі записи можуть губитись під час раптового відключення. При \code{writeConcern = majority} має виходити очікуваний результат.
 
 \subsection{Вимоги до звіту та реалізації}
 \begin{itemize}
-    \item Мова реалізації будь-яка
-    \item Не використовувати ORM-фреймворки (Hibernate, SQLAlchemy, \dots)
-    \item Не забувати про необхідність окремої транзакції на кожен запис
+    \item команди та результати їх виконання у вигляді скріншотів
+    \item аналіз отриманих результатів
+
 \end{itemize}
 
 \section{Хід роботи}
@@ -81,152 +87,107 @@ MongoDB запущена через Docker відповідним docker-compose
     label={lst:US}
 ]{docker-compose.yml}
 
-Після запуску контейнерів, виконано наступні команди для ініціалізації:
-\fontsize{6}{1}{
+Після запуску контейнерів, виконано команду для ініціалізації:
+\begin{figure}[h]
+        \centering
+        \includegraphics[width=\linewidth]{images/init.png}
+        \caption{Ініціалізація кластеру}
+\end{figure}
+
+\begin{figure}[h]
+        \centering
+        \includegraphics[height=0.9\textheight]{images/status.png}
+        \caption{Лог існування Primary}
+        \label{fig:primary}
+\end{figure}
+
+Як видно з логу на рисунку \ref{fig:primary}, вибори проведені і Primary існує.
+
+\subsection{Прості записи}
+Виконання простих записів з різними умовами роботи нодів MongoDB виконує наступний код:
+\lstinputlisting[
+    language=python,
+    caption={simple\_write.py},
+]{simple_write.py}
+
+Для повністю працюючого кластера код виводить:
 \begin{verbatim}
-C:\Users\misha>docker exec -it mongo1 mongosh
-Current Mongosh Log ID: 6937fe96dd0696c23c9dc29c
-Connecting to:          mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.5.9
-Using MongoDB:          7.0.26
-Using Mongosh:          2.5.9
+Attempting insert
+Write acknowledged: 693864cfa44a957b71adf265
+Attempting read
+Read result: {'_id': ObjectId('693864cfa44a957b71adf265'),
+ 'msg': 'write concern 3 test',
+ 'ts': datetime.datetime(2025, 12, 9, 20, 5, 3, 473000)}
+Done.
+\end{verbatim}
 
-For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
+Для одного вимкненого Secondary код вічно очікував. Після увімкнення ноди:
+\begin{verbatim}
+Attempting insert
+Write acknowledged: 693864ebf413918fc4237cd8
+Attempting read
+Read result: {'_id': ObjectId('693864ebf413918fc4237cd8'),
+ 'msg': 'write concern 3 test',
+ 'ts': datetime.datetime(2025, 12, 9, 20, 5, 31, 380000)}
+Done.
+\end{verbatim}
 
-------
-   The server generated these startup warnings when booting
-   2025-12-09T10:33:29.459+00:00: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/core/prodnotes-filesystem
-   2025-12-09T10:33:30.143+00:00: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
-   2025-12-09T10:33:30.143+00:00: For customers running MongoDB 7.0, we suggest changing the contents of the following sysfsFile
-   2025-12-09T10:33:30.143+00:00: vm.max_map_count is too low
-------
+Скінченний таймаут для вимкненого Secondary:
+\begin{verbatim}
+Attempting insert
+WRITE FAILED:
+<class 'pymongo.errors.WTimeoutError'> waiting for replication timed out, 
+full error: {'code': 64, 'codeName': 'WriteConcernFailed', 
+'errmsg': 'waiting for replication timed out', 
+'errInfo': {'wtimeout': True, 'writeConcern': {'w': 3, 'wtimeout': 10000, 'provenance': 'clientSupplied'}}}
+\end{verbatim}
 
-test> rs.initiate({
-...   _id: "rs0",
-...   members: [
-...     { _id: 0, host: "mongo1:27017" },
-...     { _id: 1, host: "mongo2:27017" },
-...     { _id: 2, host: "mongo3:27017" }
-...   ]
-... })
-{ ok: 1 }
-rs0 [direct: other] test> rs.status()
-{
-  set: 'rs0',
-  date: ISODate('2025-12-09T10:53:43.182Z'),
-  myState: 1,
-  term: Long('1'),
-  syncSourceHost: '',
-  syncSourceId: -1,
-  heartbeatIntervalMillis: Long('2000'),
-  majorityVoteCount: 2,
-  writeMajorityCount: 2,
-  votingMembersCount: 3,
-  writableVotingMembersCount: 3,
-  optimes: {
-    lastCommittedOpTime: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
-    lastCommittedWallTime: ISODate('2025-12-09T10:53:30.172Z'),
-    readConcernMajorityOpTime: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
-    appliedOpTime: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
-    durableOpTime: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
-    lastAppliedWallTime: ISODate('2025-12-09T10:53:30.172Z'),
-    lastDurableWallTime: ISODate('2025-12-09T10:53:30.172Z')
-  },
-  lastStableRecoveryTimestamp: Timestamp({ t: 1765277569, i: 1 }),
-  electionCandidateMetrics: {
-    lastElectionReason: 'electionTimeout',
-    lastElectionDate: ISODate('2025-12-09T10:49:09.524Z'),
-    electionTerm: Long('1'),
-    lastCommittedOpTimeAtElection: { ts: Timestamp({ t: 1765277339, i: 1 }), t: Long('-1') },
-    lastSeenOpTimeAtElection: { ts: Timestamp({ t: 1765277339, i: 1 }), t: Long('-1') },
-    numVotesNeeded: 2,
-    priorityAtElection: 1,
-    electionTimeoutMillis: Long('10000'),
-    numCatchUpOps: Long('0'),
-    newTermStartDate: ISODate('2025-12-09T10:49:09.567Z'),
-    wMajorityWriteAvailabilityDate: ISODate('2025-12-09T10:49:10.083Z')
-  },
-  members: [
-    {
-      _id: 0,
-      name: 'mongo1:27017',
-      health: 1,
-      state: 1,
-      stateStr: 'PRIMARY',
-      uptime: 1214,
-      optime: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
-      optimeDate: ISODate('2025-12-09T10:53:30.000Z'),
-      lastAppliedWallTime: ISODate('2025-12-09T10:53:30.172Z'),
-      lastDurableWallTime: ISODate('2025-12-09T10:53:30.172Z'),
-      syncSourceHost: '',
-      syncSourceId: -1,
-      infoMessage: '',
-      electionTime: Timestamp({ t: 1765277349, i: 1 }),
-      electionDate: ISODate('2025-12-09T10:49:09.000Z'),
-      configVersion: 1,
-      configTerm: 1,
-      self: true,
-      lastHeartbeatMessage: ''
-    },
-    {
-      _id: 1,
-      name: 'mongo2:27017',
-      health: 1,
-      state: 2,
-      stateStr: 'SECONDARY',
-      uptime: 283,
-      optime: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
-      optimeDurable: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
-      optimeDate: ISODate('2025-12-09T10:53:30.000Z'),
-      optimeDurableDate: ISODate('2025-12-09T10:53:30.000Z'),
-      lastAppliedWallTime: ISODate('2025-12-09T10:53:30.172Z'),
-      lastDurableWallTime: ISODate('2025-12-09T10:53:30.172Z'),
-      lastHeartbeat: ISODate('2025-12-09T10:53:41.546Z'),
-      lastHeartbeatRecv: ISODate('2025-12-09T10:53:42.547Z'),
-      pingMs: Long('0'),
-      lastHeartbeatMessage: '',
-      syncSourceHost: 'mongo1:27017',
-      syncSourceId: 0,
-      infoMessage: '',
-      configVersion: 1,
-      configTerm: 1
-    },
-    {
-      _id: 2,
-      name: 'mongo3:27017',
-      health: 1,
-      state: 2,
-      stateStr: 'SECONDARY',
-      uptime: 283,
-      optime: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
-      optimeDurable: { ts: Timestamp({ t: 1765277610, i: 4 }), t: Long('1') },
-      optimeDate: ISODate('2025-12-09T10:53:30.000Z'),
-      optimeDurableDate: ISODate('2025-12-09T10:53:30.000Z'),
-      lastAppliedWallTime: ISODate('2025-12-09T10:53:30.172Z'),
-      lastDurableWallTime: ISODate('2025-12-09T10:53:30.172Z'),
-      lastHeartbeat: ISODate('2025-12-09T10:53:41.546Z'),
-      lastHeartbeatRecv: ISODate('2025-12-09T10:53:42.546Z'),
-      pingMs: Long('0'),
-      lastHeartbeatMessage: '',
-      syncSourceHost: 'mongo1:27017',
-      syncSourceId: 0,
-      infoMessage: '',
-      configVersion: 1,
-      configTerm: 1
-    }
-  ],
-  ok: 1,
-  '$clusterTime': {
-    clusterTime: Timestamp({ t: 1765277610, i: 4 }),
-    signature: {
-      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
-      keyId: Long('0')
-    }
-  },
-  operationTime: Timestamp({ t: 1765277610, i: 4 })
-}
-\end{verbatim}}
+Скінченний таймаут та увімкнення Secondary під час нього:
+\begin{verbatim}
+Attempting insert
+Write acknowledged: 693865b51c6e7fa3b7764217
+Attempting read
+Read result: {'_id': ObjectId('693865b51c6e7fa3b7764217'),
+ 'msg': 'write concern 3 test', 
+ 'ts': datetime.datetime(2025, 12, 9, 20, 8, 53, 70000)}
+\end{verbatim}
 
-Як видно з логу, вибори проведені і є Primary.
+Продемонструвати вибори не вийшло, оскільки працюючі ноди не дозволили підключення через термінал до mongosh після вимкнення Primary ноди. 
+Довгий процес дебагу не виявив помилок, які могли б викликати таку поведінку :/
+
+\subsection{Реалізація клієнта}
+Клієнт запускається пайтон-скриптом, в якому в залежності від завдання виставляється відповідний \code{writeConcern}.
+\lstinputlisting[
+    language=python,
+    caption={worker.py},
+]{worker.py}
+
+
+\subsection{WC = 1}
+Результати тестування:\\
+Час роботи: 26.37 секунд\\
+Пропускна здатність: 3792.65 запитів/с\\
+Кінцеве значення лічильника: 100к
+
+\subsection{WC = 'majority'}
+Результати тестування:\\
+Час роботи: 76.2 секунди\\
+Пропускна здатність: 1312.37 запитів/с\\
+Кінцеве значення лічильника: 100к
+
+\subsection{WC = 1 та падіння Primary}
+Результати тестування:\\
+Час роботи: 23.05 секунд\\
+Пропускна здатність: 4338.28 запитів/с\\
+Кінцеве значення лічильника: 100к
+
+\subsection{WC = 'majority' та падіння Primary}
+Результати тестування:\\
+Час роботи: 59.51 секунд\\
+Пропускна здатність: 1680.42 запитів/с\\
+Кінцеве значення лічильника: 100к
+
+
 
 \section{Результати}
 \begin{center}
@@ -234,17 +195,13 @@ rs0 [direct: other] test> rs.status()
     \hline
     Варіант & Час роботи & Пропускна здатність & Значення лічильника \\
     \hline
-    Lost-update & 15.21 & 6573 & 10661 \\
+    1 & 26.37 & 3792.65 & 100к \\
     \hline
-    Serializable & 3 & --- & 10к \\
+    majority & 76.2 & 1312.37 & 100к \\
     \hline
-    Ser. з повтором & 860 & 116.15 & 100k \\
+    1 та падіння & 23.05 & 4338.28 & 100к \\
     \hline
-    Inplace update & 12.56 & 7963 & 100k\\
-    \hline
-    Row-level locking & 20.06 & 4985 & 100k\\
-    \hline
-    Optimistic concurrency control & 88 & 1136.31 & 100k\\
+    majority та падіння & 59.51 & 1680.42 & 100k \\
     \hline
     
 \end{tabular}

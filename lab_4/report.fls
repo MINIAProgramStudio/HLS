@@ -155,29 +155,52 @@ INPUT C:\Program Files\MiKTeX\fonts\tfm\public\cm\cmsy6.tfm
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\tfm\lh\lh-t2a\larm1440.tfm
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\tfm\lh\lh-t2a\labx1440.tfm
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\tfm\lh\lh-t2a\labx1200.tfm
+INPUT C:\Program Files\MiKTeX\fonts\tfm\jknappen\ec\tcrm1000.tfm
 INPUT C:\Program Files\MiKTeX\tex\latex\cyrillic\t2acmtt.fd
 INPUT C:\Program Files\MiKTeX\tex\latex\cyrillic\t2acmtt.fd
 INPUT C:\Program Files\MiKTeX\tex\latex\cyrillic\t2acmtt.fd
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\tfm\lh\lh-t2a\latt1000.tfm
-INPUT C:\Program Files\MiKTeX\fonts\tfm\jknappen\ec\tcrm1000.tfm
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\map\pdftex\pdftex.map
 INPUT .\docker-compose.yml
 INPUT .\docker-compose.yml
 INPUT docker-compose.yml
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\tfm\lh\lh-t2a\larm0500.tfm
-INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\map\pdftex\pdftex.map
-INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\tfm\lh\lh-t2a\larm0600.tfm
+INPUT .\images\init.png
+INPUT .\images\init.png
+INPUT .\images\init.png
+INPUT .\images\init.png
+INPUT .\images\init.png
+INPUT .\images\init.png
+INPUT .\images\init.png
+INPUT .\images\status.png
+INPUT .\images\status.png
+INPUT .\images\status.png
+INPUT .\images\status.png
+INPUT .\images\status.png
+INPUT .\images\status.png
+INPUT .\images\status.png
+INPUT C:\Program Files\MiKTeX\tex\latex\listings\lstlang1.sty
+INPUT C:\Program Files\MiKTeX\tex\latex\listings\lstlang1.sty
+INPUT C:\Program Files\MiKTeX\tex\latex\listings\lstlang1.sty
+INPUT .\simple_write.py
+INPUT .\simple_write.py
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\tfm\lh\lh-t2a\latt0800.tfm
+INPUT simple_write.py
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\tfm\lh\lh-t2a\larm0800.tfm
+INPUT .\worker.py
+INPUT .\worker.py
+INPUT worker.py
 INPUT report.aux
 INPUT .\report.out
 INPUT .\report.out
-INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi450\latt0800.pk
-INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi450\latt0800.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\latt0800.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\latt0800.pk
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\larm0500.pk
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\larm0500.pk
-INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\jknappen\ec\dpi600\tcrm1000.pk
-INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\jknappen\ec\dpi600\tcrm1000.pk
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\latt1000.pk
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\latt1000.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\jknappen\ec\dpi600\tcrm1000.pk
+INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\jknappen\ec\dpi600\tcrm1000.pk
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\larm1000.pk
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\larm1000.pk
 INPUT C:\Users\misha\AppData\Local\MiKTeX\fonts\pk\ljfour\lh\lh-t2a\dpi600\labx1200.pk
