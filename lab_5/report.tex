@@ -135,22 +135,141 @@ counter (цей тип буде підтримувати операції increm
     label={lst:DC}
 ]{docker-compose.yml}
 
-\subsection {Частина 1. Робота зі структурами даних у Cassandra}
+\subsection{Частина 1. Робота зі структурами даних у Cassandra}
 Для повторюванності виконання запитів до Cassandra, запити виконуються pyton скриптом.
 Також, це дозволяє створити генератор даних для таблиць.
-Окрім вказаного в завданні функціоналу, скрипт видаляє keyspace, якщо він вже існує.
+Окрім вказаного в завданні функціоналу, скрипт видаляє keyspace, якщо він вже існує та генерує тестові дані.
 
 \lstinputlisting[
     language=python,
     caption={part\_1.py},
 ]{part_1.py}
 
-Результати тестування:\\
-Час роботи: 59.51 секунд\\
-Пропускна здатність: 1680.42 запитів/с\\
-Кінцеве значення лічильника: 100к
+DESCRIBE:
+\begin{figure}[h]
+        \centering
+        \includegraphics[width=1\linewidth]{images/DESCRIBE_tables.png}
+        \caption{Ініціалізація кластеру}
+\end{figure}
 
+Результат роботи коду (перший рядок виводу SELECT з ентерами, для демонстрації всіх полів. Інші рядки -- виходять за межі сторінки і обрізаються, але так цей вивід хоча б можна дочитати до останнього рядка):
 
+\small{
+\begin{verbatim}
+Trying to reach Cassandra node 1
+Keyspace 'lab_keyspace' dropped
+Keyspace 'lab_keyspace' created
+Table 'items' created
+Index on attributes created
+Test data into items inserted
+Table 'orders' created
+Test data into orders inserted
+Waiting for manual DESCRIBE
+
+Category with sorting by price:
+Row(category='aluminium', price=Decimal('124.95'), 
+item_id=UUID('dad7d4cf-9aa5-477b-a374-229e0b4a5835'), 
+attributes=OrderedMapSerializedKey([('height', '310.11'), 
+('length', '373.82')]), name='Kpfrugtqsokbl', 
+producer='FizTech co.')
+Row(category='aluminium', price=Decimal('260.15'), item_id=UUID('680df2e5-e7b9-4210-8ad9-d23de98eb076'), attributes=OrderedMapSerializedKey([('height', '642.34'), ('weight', '92.21'), ('width', '252.64')]), name='Ynkhagnf', producer='Siko R Sky')
+Row(category='aluminium', price=Decimal('413.91'), item_id=UUID('4b9e9cc3-90d1-4779-9d5e-5584e05c8829'), attributes=OrderedMapSerializedKey([('height', '507.03'), ('length', '366.8')]), name='Fbhkpowrxd', producer='FizTech co.')
+Row(category='aluminium', price=Decimal('511.15'), item_id=UUID('f45ec388-6a01-4295-b5ca-4a4d341ec3b1'), attributes=OrderedMapSerializedKey([('height', '935.25'), ('weight', '45.63')]), name='Ndzxnbo', producer='Siko R Sky')
+Row(category='aluminium', price=Decimal('523.68'), item_id=UUID('b928eef1-0595-432d-a941-c11aea715254'), attributes=OrderedMapSerializedKey([('length', '668.62'), ('weight', '527.63')]), name='Vamrvah', producer='Siko R Sky')
+Row(category='aluminium', price=Decimal('809.32'), item_id=UUID('69ab1b67-d537-4ce8-83fa-e923fa51b01c'), attributes=None, name='Yhytphvrvudv', producer='KPI and others')
+Row(category='aluminium', price=Decimal('1623.66'), item_id=UUID('0d67b2b9-f434-4020-8d02-9be70ca4ce97'), attributes=OrderedMapSerializedKey([('height', '2.46'), ('weight', '559.62')]), name='Tnrxnsp', producer='Siko R Sky')
+Row(category='aluminium', price=Decimal('2709.36'), item_id=UUID('5c09a956-c6c7-4afc-b645-fe971c4e2f0f'), attributes=OrderedMapSerializedKey([('height', '975.44'), ('length', '423.22')]), name='Rkqqucuhnqosxq', producer='Aperture laboratories')
+Row(category='aluminium', price=Decimal('3051.55'), item_id=UUID('7dfc937d-3b64-43fb-8d0e-ec91b0fe540c'), attributes=OrderedMapSerializedKey([('height', '143.66'), ('width', '827.48')]), name='Ngpgkt', producer='Aperture laboratories')
+Row(category='aluminium', price=Decimal('4355.98'), item_id=UUID('c14a532c-844e-43b4-8da8-498d7e7829a6'), attributes=None, name='Mybye', producer='Aperture laboratories')
+Row(category='aluminium', price=Decimal('4611.29'), item_id=UUID('c20486a5-caf6-47cc-a24f-67e866978646'), attributes=None, name='Rqzhzldarwuj', producer='FizTech co.')
+Row(category='aluminium', price=Decimal('4622.4'), item_id=UUID('e561a306-2fd2-44ae-9f7e-46d11eb60a84'), attributes=OrderedMapSerializedKey([('height', '964.7'), ('length', '658.96'), ('weight', '187.45'), ('width', '549.99')]), name='Nquh', producer='FizTech co.')
+Row(category='aluminium', price=Decimal('5614.39'), item_id=UUID('1f5e14ec-7701-4ef1-8cf8-d501f22eaf7b'), attributes=OrderedMapSerializedKey([('height', '316.64'), ('weight', '629.27'), ('width', '695.22')]), name='Roipbelyiweyq', producer='Mann. co.')
+Row(category='aluminium', price=Decimal('8239.14'), item_id=UUID('f8da65f4-a7f5-4cdb-89c1-4530032ffc58'), attributes=OrderedMapSerializedKey([('length', '114.81'), ('weight', '250.88'), ('width', '793.46')]), name='Oczbyy', producer='Aperture laboratories')
+Row(category='aluminium', price=Decimal('8831.77'), item_id=UUID('11bb7583-312e-4346-94ef-e39619a2142b'), attributes=OrderedMapSerializedKey([('height', '341.97'), ('length', '388.7')]), name='Nvaincjwy', producer='Mann. co.')
+Row(category='aluminium', price=Decimal('9439.91'), item_id=UUID('22fbcf85-fae0-4e78-b98d-c4ed7f6cf7a5'), attributes=OrderedMapSerializedKey([('weight', '467.21')]), name='Orapcyxzusmfsvzx', producer='Walter White chemistry site')
+Row(category='aluminium', price=Decimal('9582.46'), item_id=UUID('7f24a4e7-c70a-45c2-9211-250c7f387d1a'), attributes=OrderedMapSerializedKey([('weight', '566.84'), ('width', '417.28')]), name='Nfhdckbkwbsqcfx', producer='FizTech co.')
+
+Category with name constrains:
+Input name: Mybye
+Row(category='aluminium', price=Decimal('4355.98'), 
+item_id=UUID('c14a532c-844e-43b4-8da8-498d7e7829a6'), 
+attributes=None, name='Mybye', 
+producer='Aperture laboratories')
+
+Category with price constrains (1000,5000):
+Row(category='aluminium', price=Decimal('1623.66'), 
+item_id=UUID('0d67b2b9-f434-4020-8d02-9be70ca4ce97'), 
+attributes=OrderedMapSerializedKey([('height', '2.46'), ('weight', '559.62')]), 
+name='Tnrxnsp', producer='Siko R Sky')
+Row(category='aluminium', price=Decimal('2709.36'), item_id=UUID('5c09a956-c6c7-4afc-b645-fe971c4e2f0f'), attributes=OrderedMapSerializedKey([('height', '975.44'), ('length', '423.22')]), name='Rkqqucuhnqosxq', producer='Aperture laboratories')
+Row(category='aluminium', price=Decimal('3051.55'), item_id=UUID('7dfc937d-3b64-43fb-8d0e-ec91b0fe540c'), attributes=OrderedMapSerializedKey([('height', '143.66'), ('width', '827.48')]), name='Ngpgkt', producer='Aperture laboratories')
+Row(category='aluminium', price=Decimal('4355.98'), item_id=UUID('c14a532c-844e-43b4-8da8-498d7e7829a6'), attributes=None, name='Mybye', producer='Aperture laboratories')
+Row(category='aluminium', price=Decimal('4611.29'), item_id=UUID('c20486a5-caf6-47cc-a24f-67e866978646'), attributes=None, name='Rqzhzldarwuj', producer='FizTech co.')
+Row(category='aluminium', price=Decimal('4622.4'), item_id=UUID('e561a306-2fd2-44ae-9f7e-46d11eb60a84'), attributes=OrderedMapSerializedKey([('height', '964.7'), ('length', '658.96'), ('weight', '187.45'), ('width', '549.99')]), name='Nquh', producer='FizTech co.')
+
+Category with price (1000,9000) and producer constrains :
+Row(category='aluminium', price=Decimal('4611.29'), item_id=UUID('c20486a5-caf6-47cc-a24f-67e866978646'), attributes=None, name='Rqzhzldarwuj', producer='FizTech co.')
+Row(category='aluminium', price=Decimal('4622.4'), item_id=UUID('e561a306-2fd2-44ae-9f7e-46d11eb60a84'), attributes=OrderedMapSerializedKey([('height', '964.7'), ('length', '658.96'), ('weight', '187.45'), ('width', '549.99')]), name='Nquh', producer='FizTech co.')
+
+Orders for RED with sorting by date:
+Row(customer_name='RED', 
+order_date=datetime.datetime(2023, 8, 7, 22, 48, 14), 
+order_id=UUID('cd9139a1-0775-4968-90e8-b3a607df2b8a'), 
+item_ids=[UUID('11bb7583-312e-4346-94ef-e39619a2142b'), 
+UUID('0d67b2b9-f434-4020-8d02-9be70ca4ce97'), 
+UUID('0061f320-9b73-455b-86ee-1a1d61f16428'), 
+UUID('81916927-d302-4bbb-a0a2-c631d6b40970'), 
+UUID('45d21142-be36-45e6-b808-eef380a7ead4'), 
+UUID('79ea5061-07cb-4fbd-99e8-f9914c97b388'), 
+UUID('866ed99c-f551-4c41-8589-686c34f29e88'), 
+UUID('1f5e14ec-7701-4ef1-8cf8-d501f22eaf7b'), 
+UUID('e1a24dac-91fd-4da0-8015-ead385b01982'), 
+UUID('c2abed94-ba5e-47bb-a676-8e1780faca58')], 
+total_price=Decimal('58830.08'))
+Row(customer_name='RED', order_date=datetime.datetime(2023, 1, 27, 8, 29), order_id=UUID('6402adbe-632f-4c58-b1e4-782e7f7a79c6'), item_ids=[UUID('fb980d78-1d13-409b-84df-5b1271c6d872'), UUID('02ada305-a2d0-4e5d-9d34-02fc7c4c3dd0'), UUID('80ea3284-c916-4e46-ac49-db678a0eeae8'), UUID('d32955a5-7b4c-4aec-b6c9-e54769e23955'), UUID('06d03a44-4883-4ff3-abf4-80157cce2b79')], total_price=Decimal('30982.49'))
+Row(customer_name='RED', order_date=datetime.datetime(2022, 3, 4, 22, 46, 44), order_id=UUID('54d4c68b-d05b-4157-b972-6e9c79a8f695'), item_ids=[UUID('9ff7ce49-e4a9-4c90-8f77-c4b5a08c0c53'), UUID('f9588f6d-2d71-4fd1-87af-44a422bcf888'), UUID('997b5367-871d-47a9-b1ed-4d42f2218377'), UUID('7b55cfb9-e3c5-45a7-afaf-dfb850022308'), UUID('b5544c38-a5d6-41cb-a2be-bc2ab1ac4a04'), UUID('d705f573-effd-4f72-ae47-5c9b9736ab5f'), UUID('1f5e14ec-7701-4ef1-8cf8-d501f22eaf7b'), UUID('4894c3ff-1ca3-4578-848d-c1fe3bfa910f'), UUID('6deb4bb3-f979-4681-ac25-a6289cf2972b'), UUID('6f55c9bd-85d7-42e0-8c62-832c0daa0b44'), UUID('926b42db-83a5-458e-bfde-ac76f9aea4b9')], total_price=Decimal('81876.04'))
+Row(customer_name='RED', order_date=datetime.datetime(2022, 1, 8, 4, 29, 50), order_id=UUID('78331eab-bf10-4453-a52e-fb6fd4b347f2'), item_ids=[UUID('69ab1b67-d537-4ce8-83fa-e923fa51b01c'), UUID('a4e0a937-b511-4786-b691-86606e0bcc6d'), UUID('c14a532c-844e-43b4-8da8-498d7e7829a6'), UUID('89d5aa9d-d706-47b4-ace3-6c9e6f3a1724'), UUID('1f5e14ec-7701-4ef1-8cf8-d501f22eaf7b'), UUID('136068a6-d399-4ef4-835d-0e687d97aecf'), UUID('c8330ff4-0b42-4be8-8c15-abc6567b481b'), UUID('b5544c38-a5d6-41cb-a2be-bc2ab1ac4a04'), UUID('6a2ee506-a1d8-4ab7-b485-08d2803bd1a8'), UUID('ad424df7-1e02-4470-ab8b-3177329991d2'), UUID('8975ecbf-f5df-4e86-b00f-19a67cd0d255'), UUID('c4c9072c-460a-4fda-9d72-6aa18562dd33'), UUID('237a60b5-3b37-453a-bdf6-9ad935ba2427'), UUID('e561a306-2fd2-44ae-9f7e-46d11eb60a84'), UUID('45d21142-be36-45e6-b808-eef380a7ead4')], total_price=Decimal('74402.15'))
+Row(customer_name='RED', order_date=datetime.datetime(2020, 4, 7, 0, 18, 37), order_id=UUID('e79fecdd-7865-467d-b579-8e611b56fadd'), item_ids=[UUID('64bc4c2e-ed9c-4aac-8b66-02c770985a30'), UUID('c988941e-e46f-416c-b93c-7cd5ec364474'), UUID('d222c084-010f-4813-83ae-c6e84ce27b0c'), UUID('e561a306-2fd2-44ae-9f7e-46d11eb60a84'), UUID('fb980d78-1d13-409b-84df-5b1271c6d872'), UUID('5b5a394f-e709-47bf-902a-6630d0682033'), UUID('8aed1542-24fa-4527-9823-8663f017587c'), UUID('22fbcf85-fae0-4e78-b98d-c4ed7f6cf7a5'), UUID('680df2e5-e7b9-4210-8ad9-d23de98eb076')], total_price=Decimal('41416.58'))    
+Row(customer_name='RED', order_date=datetime.datetime(2019, 4, 1, 22, 49, 17), order_id=UUID('1c8ec1b0-f9c6-4a1d-adad-9bca1a2fd7f4'), item_ids=[UUID('99402a57-210d-4ab5-b7a4-d8c876bde38b'), UUID('90bc54d3-c5e9-4aa5-a2d6-66990f16e31f'), UUID('ad424df7-1e02-4470-ab8b-3177329991d2'), UUID('6ef5c9e4-0c3b-451b-9575-6af3ae1ded11'), UUID('a4e0a937-b511-4786-b691-86606e0bcc6d'), UUID('8c6a06f1-0881-41dc-9205-0363656dd6da'), UUID('e561a306-2fd2-44ae-9f7e-46d11eb60a84'), UUID('0d67b2b9-f434-4020-8d02-9be70ca4ce97'), UUID('41b49380-e5aa-4c47-ad60-992aa53a7b32'), UUID('680df2e5-e7b9-4210-8ad9-d23de98eb076'), UUID('57f7c556-a506-465a-a1db-bf3c30e5475e')], total_price=Decimal('47194.27'))
+Row(customer_name='RED', order_date=datetime.datetime(2018, 7, 27, 18, 42, 54), order_id=UUID('72ec1337-c11b-461d-945d-7192792c7506'), item_ids=[UUID('d6396a9f-0219-4bc2-b8c2-f7f709b0ce98'), UUID('0ffd6763-ea01-45bf-a602-f70794d420b7'), UUID('bd76139e-5f5b-4ed5-b197-4a38b7d1c48a'), UUID('7b55cfb9-e3c5-45a7-afaf-dfb850022308'), UUID('0061f320-9b73-455b-86ee-1a1d61f16428'), UUID('8869ca61-93e2-483c-823c-bf29e58825d2')], total_price=Decimal('32667.54'))
+Row(customer_name='RED', order_date=datetime.datetime(2016, 12, 1, 7, 32, 45), order_id=UUID('c2fe058b-2e32-4ca3-a305-574dda9aa561'), item_ids=[UUID('9382acef-2688-497f-bd7a-3f11cffece2a'), UUID('dad7d4cf-9aa5-477b-a374-229e0b4a5835'), UUID('136068a6-d399-4ef4-835d-0e687d97aecf'), UUID('6ef5c9e4-0c3b-451b-9575-6af3ae1ded11'), UUID('44e3c02d-2ecf-4b77-8326-2d982c65b1f6'), UUID('9b14fb5d-fd55-4856-b8b8-356b7f00a65f'), UUID('6deb4bb3-f979-4681-ac25-a6289cf2972b'), UUID('a9c997ae-2a98-474b-a461-d3c10e920d6b'), UUID('aba109df-8fc4-4b4b-a10a-60dfb4c59baf'), UUID('c908ca9c-286e-4d93-aec3-eda33b74dfb0'), UUID('926b42db-83a5-458e-bfde-ac76f9aea4b9'), UUID('8c6a06f1-0881-41dc-9205-0363656dd6da')], total_price=Decimal('47088.64'))
+Row(customer_name='RED', order_date=datetime.datetime(2016, 10, 21, 3, 57, 14), order_id=UUID('58cc5fc4-b486-4ff1-bf46-fbe1a24e9da6'), item_ids=[UUID('bd76139e-5f5b-4ed5-b197-4a38b7d1c48a'), UUID('9c887e18-8378-48ea-aa14-83ec6b031cad'), UUID('c8330ff4-0b42-4be8-8c15-abc6567b481b'), UUID('c20486a5-caf6-47cc-a24f-67e866978646'), UUID('136068a6-d399-4ef4-835d-0e687d97aecf'), UUID('a76477aa-f40f-449e-8b0a-98855a4b5875'), UUID('90bc54d3-c5e9-4aa5-a2d6-66990f16e31f'), UUID('38212260-2c71-4925-a360-4942f227f649'), UUID('237a60b5-3b37-453a-bdf6-9ad935ba2427'), UUID('d222c084-010f-4813-83ae-c6e84ce27b0c'), UUID('680df2e5-e7b9-4210-8ad9-d23de98eb076'), UUID('59e4cfdb-f88d-408a-80dd-895a21b15393'), UUID('5b5a394f-e709-47bf-902a-6630d0682033'), UUID('7b55cfb9-e3c5-45a7-afaf-dfb850022308')], total_price=Decimal('65561.75'))
+Row(customer_name='RED', order_date=datetime.datetime(2016, 1, 31, 22, 18, 53), order_id=UUID('327b8ee0-ecb0-4ba5-9556-ee7e51bca6c7'), item_ids=[UUID('06d03a44-4883-4ff3-abf4-80157cce2b79'), UUID('7b55cfb9-e3c5-45a7-afaf-dfb850022308'), UUID('6a2ee506-a1d8-4ab7-b485-08d2803bd1a8'), UUID('0adeb8dc-7aeb-4df3-8db0-87c763615a61'), UUID('6f55c9bd-85d7-42e0-8c62-832c0daa0b44'), UUID('aaff698e-f78f-4f27-b3b8-3090d80942c6'), UUID('9e338fe1-de7a-4d11-84b9-13a4907db86a'), UUID('02ada305-a2d0-4e5d-9d34-02fc7c4c3dd0'), UUID('0061f320-9b73-455b-86ee-1a1d61f16428'), UUID('aba109df-8fc4-4b4b-a10a-60dfb4c59baf'), UUID('9b14fb5d-fd55-4856-b8b8-356b7f00a65f'), UUID('f45ec388-6a01-4295-b5ca-4a4d341ec3b1'), UUID('9ff7ce49-e4a9-4c90-8f77-c4b5a08c0c53'), UUID('1b332dc6-43d0-46d6-bdab-ffbec82ebf1d'), UUID('866ed99c-f551-4c41-8589-686c34f29e88')], total_price=Decimal('80382.45'))
+Row(customer_name='RED', order_date=datetime.datetime(2015, 11, 15, 13, 45, 19), order_id=UUID('2259b3f8-e80b-4fb1-b607-6e2b925403ae'), item_ids=[UUID('02ada305-a2d0-4e5d-9d34-02fc7c4c3dd0'), UUID('6deb4bb3-f979-4681-ac25-a6289cf2972b'), UUID('81916927-d302-4bbb-a0a2-c631d6b40970'), UUID('6f55c9bd-85d7-42e0-8c62-832c0daa0b44'), UUID('1d973f31-756f-4854-b7a1-4504f1ded9d4'), UUID('d475e253-ef45-4386-b1a4-0b9576c8d8e2'), UUID('c14a532c-844e-43b4-8da8-498d7e7829a6'), UUID('e1a24dac-91fd-4da0-8015-ead385b01982'), UUID('06d03a44-4883-4ff3-abf4-80157cce2b79'), UUID('539f4874-0a84-4853-8afd-5e69cb904d0e'), UUID('99daa415-8e36-494c-86ce-b8b38eb445f7'), UUID('f20d0875-38fc-463e-abf0-418013bd5666')], total_price=Decimal('62211.85'))
+Row(customer_name='RED', order_date=datetime.datetime(2015, 10, 21, 15, 14, 40), order_id=UUID('8c15e88e-e524-4882-80fe-21301e734316'), item_ids=[UUID('deca10e7-b007-4d69-bb7c-a9ae45cbdd44')], total_price=Decimal('5296.32'))
+Row(customer_name='RED', order_date=datetime.datetime(2015, 7, 11, 9, 21, 50), order_id=UUID('c53710a7-c43d-4d66-9ccb-d61b41294bfc'), item_ids=[UUID('5b5a394f-e709-47bf-902a-6630d0682033'), UUID('aba109df-8fc4-4b4b-a10a-60dfb4c59baf'), UUID('667edc9d-6be7-4950-9950-62ad836d65c7'), UUID('a9c997ae-2a98-474b-a461-d3c10e920d6b'), UUID('8975ecbf-f5df-4e86-b00f-19a67cd0d255'), UUID('645f6bc3-9845-4504-bae4-e6d3b4c5aea4'), UUID('80ea3284-c916-4e46-ac49-db678a0eeae8'), UUID('1d973f31-756f-4854-b7a1-4504f1ded9d4'), UUID('866ed99c-f551-4c41-8589-686c34f29e88'), UUID('9382acef-2688-497f-bd7a-3f11cffece2a'), UUID('237a60b5-3b37-453a-bdf6-9ad935ba2427'), UUID('d222c084-010f-4813-83ae-c6e84ce27b0c')], total_price=Decimal('66351.26'))
+
+All orders total price for every customer:
+Doofenshmirtz Evil Inc. 327056.09
+O.W.C.A 514832.90
+This company does not build secret goverment progects Inc. 389293.64
+Baldwin locomotive company 381497.00
+Construction company that constructs offices for construction companies 607143.54
+RED 694261.42
+BLU 284720.39
+Depressing coal mines 337731.01
+Slightly less depressing coal mines 509513.92
+
+WRITETIME:
+Row(order_id=UUID('cd9139a1-0775-4968-90e8-b3a607df2b8a'), 
+customer_name='RED', price_write_time=1766000896582849)
+Row(order_id=UUID('6402adbe-632f-4c58-b1e4-782e7f7a79c6'), customer_name='RED', price_write_time=1766000897311108)
+Row(order_id=UUID('54d4c68b-d05b-4157-b972-6e9c79a8f695'), customer_name='RED', price_write_time=1766000896891466)
+Row(order_id=UUID('78331eab-bf10-4453-a52e-fb6fd4b347f2'), customer_name='RED', price_write_time=1766000897620118)
+Row(order_id=UUID('e79fecdd-7865-467d-b579-8e611b56fadd'), customer_name='RED', price_write_time=1766000896228225)
+Row(order_id=UUID('1c8ec1b0-f9c6-4a1d-adad-9bca1a2fd7f4'), customer_name='RED', price_write_time=1766000896737074)
+Row(order_id=UUID('72ec1337-c11b-461d-945d-7192792c7506'), customer_name='RED', price_write_time=1766000896537186)
+Row(order_id=UUID('c2fe058b-2e32-4ca3-a305-574dda9aa561'), customer_name='RED', price_write_time=1766000897142151)
+Row(order_id=UUID('58cc5fc4-b486-4ff1-bf46-fbe1a24e9da6'), customer_name='RED', price_write_time=1766000896906403)
+Row(order_id=UUID('327b8ee0-ecb0-4ba5-9556-ee7e51bca6c7'), customer_name='RED', price_write_time=1766000896598640)
+Row(order_id=UUID('2259b3f8-e80b-4fb1-b607-6e2b925403ae'), customer_name='RED', price_write_time=1766000897248786)
+Row(order_id=UUID('8c15e88e-e524-4882-80fe-21301e734316'), customer_name='RED', price_write_time=1766000897588449)
+Row(order_id=UUID('c53710a7-c43d-4d66-9ccb-d61b41294bfc'), customer_name='RED', price_write_time=1766000897495075)
+End
+\end{verbatim}
+}
+
+\subsection{Частина 2. Налаштування реплікації у Cassandra}
 
 \section{Результати}
 \begin{center}

@@ -8,12 +8,16 @@ services:
     ports:
       - "9042:9042"
     environment:
+    
       CASSANDRA_CLUSTER_NAME: "TestCluster"
-      CASSANDRA_SEEDS: "cassandra1,cassandra2,cassandra3"
+      CASSANDRA_SEEDS: "cassandra1"
       CASSANDRA_DC: "dc1"
       CASSANDRA_RACK: "rack1"
       CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
       CASSANDRA_NUM_TOKENS: 256
+      CASSANDRA_RPC_ADDRESS: 0.0.0.0
+      CASSANDRA_BROADCAST_RPC_ADDRESS: "cassandra1"
+
     volumes:
       - cassandra1-data:/var/lib/cassandra
     restart: unless-stopped
@@ -30,11 +34,13 @@ services:
       - cassandra1
     environment:
       CASSANDRA_CLUSTER_NAME: "TestCluster"
-      CASSANDRA_SEEDS: "cassandra1,cassandra2,cassandra3"
+      CASSANDRA_SEEDS: "cassandra1"
       CASSANDRA_DC: "dc1"
       CASSANDRA_RACK: "rack1"
       CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
       CASSANDRA_NUM_TOKENS: 256
+      CASSANDRA_RPC_ADDRESS: 0.0.0.0
+      CASSANDRA_BROADCAST_RPC_ADDRESS: "cassandra1"
     volumes:
       - cassandra2-data:/var/lib/cassandra
     restart: unless-stopped
@@ -51,11 +57,13 @@ services:
       - cassandra1
     environment:
       CASSANDRA_CLUSTER_NAME: "TestCluster"
-      CASSANDRA_SEEDS: "cassandra1,cassandra2,cassandra3"
+      CASSANDRA_SEEDS: "cassandra1"
       CASSANDRA_DC: "dc1"
       CASSANDRA_RACK: "rack1"
       CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
       CASSANDRA_NUM_TOKENS: 256
+      CASSANDRA_RPC_ADDRESS: 0.0.0.0
+      CASSANDRA_BROADCAST_RPC_ADDRESS: "cassandra1"
     volumes:
       - cassandra3-data:/var/lib/cassandra
     restart: unless-stopped
